@@ -1,6 +1,6 @@
 # QR Forge
 
-A single-file, browser-based QR code designer by [Accurova](https://accurova.com). Open `index.html` — no build step, no backend.
+A single-file, browser-based QR code designer by [TheBooleanJulian](https://github.com/TheBooleanJulian). Open `index.html` — no build step, no backend.
 
 ## Features
 
