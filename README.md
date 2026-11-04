@@ -2,6 +2,8 @@
 
 A single-file, browser-based QR code designer by [TheBooleanJulian](https://github.com/TheBooleanJulian). Open `index.html` — no build step, no backend.
 
+**Live:** https://qr-forge.thebooleanjulian.dev
+
 ## Features
 
 - Custom centre icon (upload any image), adjustable size, padded or clean-square backing, optional invert
@@ -14,9 +16,13 @@ A single-file, browser-based QR code designer by [TheBooleanJulian](https://gith
 
 ## Usage
 
-Open `index.html` in a browser, or serve the folder with any static host.
+Use the live site above, open `index.html` in a browser, or serve the folder with any static host.
 
 Fonts (Google Fonts) and [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) 1.4.4 (cdnjs) load from CDNs, so an internet connection is needed.
+
+## Deployment
+
+Hosted on Cloudflare Workers (static assets) at `qr-forge.thebooleanjulian.dev`. [wrangler.jsonc](wrangler.jsonc) serves the repo root; [.assetsignore](.assetsignore) keeps non-site files out of the upload. Deploy with `npx wrangler deploy`. To roll back the custom domain, remove `routes` and redeploy.
 
 ## License
 
