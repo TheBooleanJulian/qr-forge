@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>QR Forge decode tests</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"></script>
+<script src="../js/core.js"></script><script src="../js/scene.js"></script><script src="../js/draw.js"></script>
+<script src="../js/svg.js"></script><script src="../js/pdf.js"></script><script src="../js/zip.js"></script>
+<script src="../js/csv.js"></script><script src="../js/validate.js"></script><script src="../js/export.js"></script>
+</head><body>
+<!-- Renders real QR codes through the app's own pipeline and decodes the final image with two
+     independent decoders (jsQR, and the browser's BarcodeDetector where it exists).
+     Open in a browser, or: msedge --headless --dump-dom --virtual-time-budget=60000 tests/decode.html -->
+<pre id="out">running…</pre>
+<script>
+const URL_='https://accurova.com/menu?table=12&lang=en';
+const rows=[];let fail=0;
+const hasBD='BarcodeDetector' in window;
+const bd=hasBD?new BarcodeDetector({formats:['qr_code']}):null;
+
+function logoPng(){
+  const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');
+  x.fillStyle='#e8344a';x.fillRect(0,0,128,128);x.fillStyle='#fff';x.font='bold 72px sans-serif';x.textAlign='center';x.fillText('A',64,92);
+  return c.toDataURL('image/png');
+}
+const LOGO=logoPng();
+function flat(cv,bg){const t=document.createElement('canvas');t.width=cv.width;t.height=cv.height;const x=t.getContext('2d');x.fillStyle=bg||'#fff';x.fillRect(0,0,t.width,t.height);x.drawImage(cv,0,0);return t;}
+async function decode(cv,bg){
+  const f=flat(cv,bg),d=f.getContext('2d').getImageData(0,0,f.width,f.height);
+  const j=jsQR(d.data,d.width,d.height,{inversionAttempts:'attemptBoth'});
+  let b=null;if(bd){try{const r=await bd.detect(f);b=r[0]?r[0].rawValue:null;}catch{b='ERR';}}
+  let z=null;
+  try{
+    const hints=new Map();hints.set(ZXing.DecodeHintType.TRY_HARDER,true);
+    const src=new ZXing.HTMLCanvasElementLuminanceSource(f);
+    const rd=new ZXing.QRCodeReader();
+    try{z=rd.decode(new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(src)),hints).getText();}
+    catch{z=rd.decode(new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(src.invert())),hints).getText();}
+  }catch{z=null;}
+  return{j:j?j.data:null,b,z};
+}
+function record(name,r,opts){
+  const jOk=r.j===URL_,zOk=r.z===URL_,bOk=!bd||r.b===URL_;
+  const ok=jOk&&zOk&&(bOk||(opts&&opts.bdOptional));
+  if(!ok)fail++;
+  rows.push(`${ok?'PASS':'FAIL'}  ${name.padEnd(46)} jsQR:${jOk?'ok':'NO'}  ZXing:${zOk?'ok':'NO'}  BD:${bd?(r.b===URL_?'ok':'NO'):'n/a'}`);
+}
+async function sceneFor(over,o){
+  const S=Object.assign(QF.sanitize({}),over||{});S.url=URL_;
+  if(S.iconB64==='LOGO')S.iconB64=LOGO;
+  const logo=S.iconB64?await QF.prepareLogo(S.iconB64,S.iInvert):null;
+  return{S,scene:QF.buildScene(S,QF.makeMatrix(URL_,S.ec),Object.assign({logo},o||{}))};
+}
+function shrink(cv,scene){            // bring an exported image to ~5 px per module, as a scanner pipeline would
+  const f=Math.min(1,5/(scene.meta.cs*cv.width/scene.W));
+  if(f>=1)return cv;
+  const c=document.createElement('canvas');c.width=Math.round(cv.width*f);c.height=Math.round(cv.height*f);
+  const x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(cv,0,0,c.width,c.height);return c;
+}
+async function png(scene,w){
+  const blob=await QF.pngBlob(scene,w);
+  const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=URL.createObjectURL(blob);});
+  const c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;c.getContext('2d').drawImage(img,0,0);return c;
+}
+async function svgCanvas(scene){
+  const svg=QF.sceneToSVG(scene);
+  const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);});
+  const k=QF.decodeScale(scene),c=document.createElement('canvas');c.width=Math.round(scene.W*k);c.height=Math.round(scene.H*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);return c;
+}
+async function check(name,over,o,bg,opt){
+  try{
+    const{scene}=await sceneFor(over,o);
+    record(name,await decode(QF.sceneToCanvas(scene,QF.decodeScale(scene)),bg),opt);
+  }catch(e){fail++;rows.push('FAIL  '+name+'  threw '+e);}
+}
+(async()=>{
+  const ST={dots:'square',crn:'square',eye:'square'};
+  await check('standard black on white',ST);
+  await check('default styling (rounded)',{});
+  await check('custom colours navy on cream',{fg:'#0b2545',bg:'#f4efe6'});
+  await check('inverted (white on dark)',{fg:'#ffffff',bg:'#0b0d12'},null,'#000',{bdOptional:true});
+  await check('rounded modules + rounded finders',{dots:'rounded',crn:'rounded',eye:'rounded'});
+  await check('dots + circular finders',{dots:'dots',crn:'dot',eye:'dot'});
+  await check('square dots, dot eyes',{dots:'square',crn:'rounded',eye:'dot'});
+  await check('finder colours differ from modules',{finOut:'#00797a',finIn:'#7a1f00'});
+  for(const ec of ['L','M','Q','H'])await check('error correction '+ec,{ec});
+  for(const ec of ['M','Q','H'])await check('centre logo, clean square, EC '+ec,{iconB64:'LOGO',ec,iSz:20});
+  await check('centre logo, padded, H',{iconB64:'LOGO',ec:'H',iClear:'padded',iSz:20});
+  await check('centre logo inverted, H',{iconB64:'LOGO',ec:'H',iInvert:true,iSz:20});
+  await check('centre logo 35% request is clamped, H',{iconB64:'LOGO',ec:'H',iSz:35});
+  await check('linear gradient (dark stops)',{gradMode:'linear',stops:['#0b2545','#0a6e8a'],gAng:45});
+  await check('radial gradient (dark stops)',{gradMode:'radial',stops:['#0b2545','#006d77']});
+  await check('three-stop gradient',{gradMode:'linear',stops:['#111827','#0b2545','#065a60'],gAng:0});
+  await check('transparent background (viewed on white)',{transp:true});
+  await check('frame SCAN ME',{frame:'scan-me'});
+  await check('frame custom text, round',{frame:'custom',frameText:'Order here',frameRad:30});
+  await check('label bottom, left aligned',{lbl:true,lblAl:'left'});
+  await check('quiet zone 4 modules',{qZ:4,pad:0});
+  await check('size 200px',{sz:200});
+  await check('size 600px',{sz:600});
+  for(const p of QF.PRESETS){const S=QF.sanitize({});QF.applyPreset(S,p.id);await check('preset: '+p.name,S,null,null,{bdOptional:p.id==='inverted-dark'});}
+  for(const p of QF.PRESETS){const S=QF.sanitize({});QF.applyPreset(S,p.id);S.iconB64='LOGO';S.iSz=18;await check('preset + logo: '+p.name,S,null,null,{bdOptional:p.id==='inverted-dark'});}
+  /* output resolutions (PNG round trip through toBlob) */
+  const base=(await sceneFor({ec:'H',iconB64:'LOGO',iSz:20})).scene;
+  for(const w of [200,380,760,1520,3040]){try{record('PNG export width '+w,await decode(shrink(await png(base,w),base)));}catch(e){fail++;rows.push('FAIL PNG '+w+' '+e);}}
+  const tr=(await sceneFor({transp:true},{})).scene;
+  record('PNG transparent export (on white)',await decode(shrink(await png(tr,760),tr)));
+  /* SVG rasterised again: proves the vector output is readable */
+  for(const [n,over] of [['SVG standard',{}],['SVG gradient',{gradMode:'radial',stops:['#0b2545','#006d77']}],['SVG logo+frame',{iconB64:'LOGO',iSz:20,frame:'scan-me'}],['SVG dots',{dots:'dots',crn:'dot'}]]){
+    try{const{scene}=await sceneFor(over);record(n,await decode(await svgCanvas(scene)));}catch(e){fail++;rows.push('FAIL '+n+' '+e);}
+  }
+  /* the app's own validator must agree with the decoders */
+  const{S,scene}=await sceneFor({ec:'H'});
+  const dec=await QF.decodeRendered(QF.sceneToCanvas(scene,QF.decodeScale(scene)),URL_);
+  const o=QF.overallStatus(QF.designChecks(S,scene),dec);
+  rows.push((o.level==='valid'?'PASS':'FAIL')+'  validator reports Valid for the default design: '+o.level);if(o.level!=='valid')fail++;
+  const bad=await QF.decodeRendered(QF.sceneToCanvas(scene,QF.decodeScale(scene)),'https://not-the-same.test');
+  const ob=QF.overallStatus([],bad);
+  rows.push((ob.level==='failed'?'PASS':'FAIL')+'  validator reports Failed when content differs: '+ob.level);if(ob.level!=='failed')fail++;
+  const s2=Object.assign(QF.sanitize({}),{fg:'#cccccc',bg:'#ffffff'});s2.url=URL_;
+  const sc2=QF.buildScene(s2,QF.makeMatrix(URL_,'H'));
+  const dec2=await QF.decodeRendered(QF.sceneToCanvas(sc2,QF.decodeScale(sc2)),URL_);
+  const o2=QF.overallStatus(QF.designChecks(s2,sc2),dec2);
+  rows.push((o2.level!=='valid'?'PASS':'FAIL')+'  low-contrast design is not reported Valid: '+o2.level);if(o2.level==='valid')fail++;
+  rows.push(`\nDecoders: jsQR + ZXing${hasBD?' + BarcodeDetector':' (BarcodeDetector unavailable here)'}`);
+  rows.push(fail?`RESULT: ${fail} FAILED`:'RESULT: ALL PASSED');
+  document.getElementById('out').textContent=rows.join('\n');
+})();
+</script></body></html>
