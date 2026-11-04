@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>QR Forge UI smoke test</title></head><body>
+<!-- Drives the real page in an iframe: presets, library, import/export, export formats, batch, print.
+     Run: msedge --headless --allow-file-access-from-files --dump-dom --virtual-time-budget=60000 tests/smoke.html -->
+<iframe id="f" src="../index.html" width="1300" height="900"></iframe>
+<pre id="out">running…</pre>
+<script>
+const rows=[];let fail=0;
+const ok=(c,n)=>{rows.push((c?'PASS  ':'FAIL  ')+n);if(!c)fail++;};
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const f=document.getElementById('f');
+f.onload=async()=>{
+  const w=f.contentWindow,d=w.document,QF=w.QF,$=id=>d.getElementById(id);
+  const errors=[];w.addEventListener('error',e=>errors.push(e.message));
+  const click=id=>$(id).click();
+  try{
+    await wait(1200);
+    ok($('vBadge').textContent.includes('Valid'),'initial render validates as Valid ('+$('vBadge').textContent+')');
+    ok($('dims').textContent==='380 × 380 px','dimensions readout');
+    /* collapsible sections */
+    const det=d.querySelector('details[data-sec=canvas]');det.open=true;await wait(50);ok(det.open,'section opens');
+    /* preset */
+    $('preset').value='brand-accent';$('preset').dispatchEvent(new w.Event('change'));await wait(500);
+    ok(QF.app.S.finOut==='#00797a'&&QF.app.S.preset==='brand-accent','preset applies several properties');
+    $('fgC').value='#222222';$('fgC').dispatchEvent(new w.Event('input'));
+    ok(QF.app.S.preset==='custom'&&$('preset').value==='custom','editing a preset switches to Custom');
+    click('resetBtn');await wait(100);ok(QF.app.S.fg==='#0d0f14'&&QF.app.S.finOut==='','reset restores defaults');
+    /* gradient + frame + zoom */
+    d.querySelector('#gmSeg [data-v=radial]').click();await wait(100);
+    ok(QF.app.S.gradMode==='radial'&&!$('gradOpts').hidden&&$('solidRow').hidden,'gradient UI');
+    d.querySelector('#gmSeg [data-v=none]').click();
+    $('frame').value='scan-me';$('frame').dispatchEvent(new w.Event('change'));await wait(500);
+    ok(QF.app.getScene().meta.framed,'frame applies');
+    $('frame').value='none';$('frame').dispatchEvent(new w.Event('change'));
+    click('zIn');await wait(120);ok(+$('zVal').textContent.replace('%','')>0,'zoom in');click('zFit');click('zReset');await wait(120);ok($('zVal').textContent==='100%','reset zoom');
+    d.querySelector('#pbgSeg [data-v=light]').click();ok($('stage').classList.contains('s-light'),'preview background');
+    /* contrast fix */
+    $('fgC').value='#9fe8e3';$('fgC').dispatchEvent(new w.Event('input'));await wait(700);
+    const fix=d.querySelector('[data-fix=contrast]');ok(!!fix,'low contrast offers a fix');
+    fix.click();await wait(700);ok(QF.contrast(QF.app.S.fg,QF.app.S.bg)>=4.5,'contrast fix reaches 4.5:1');
+    /* save / library */
+    click('saveBtn');await wait(150);$('dInput').value='Smoke QR';click('dYes');await wait(500);
+    ok($('libCnt').textContent==='1','save adds a library entry');
+    ok($('saveBtn').textContent==='Update QR','button becomes Update');
+    d.getElementById('tL').click();await wait(300);
+    ok(!!d.querySelector('.lcard'),'library lists the entry');
+    d.querySelector('[data-act=dup]').click();await wait(400);ok(d.querySelectorAll('.lcard').length===2,'duplicate');
+    $('libQ').value='copy';$('libQ').dispatchEvent(new w.Event('input'));await wait(300);ok(d.querySelectorAll('.lcard').length===1,'search filters');
+    $('libQ').value='';$('libQ').dispatchEvent(new w.Event('input'));await wait(200);
+    d.querySelector('#libView [data-v=grid]').click();await wait(200);ok($('libList').classList.contains('grid'),'grid view');
+    const copyCard=[...d.querySelectorAll('.lcard')].find(c=>c.querySelector('.lname').textContent.startsWith('Copy of'));
+    copyCard.querySelector('[data-act=del]').click();await wait(150);click('dYes');await wait(400);ok(d.querySelectorAll('.lcard').length===1,'delete after confirmation');
+    /* project export/import */
+    const entry=(await QF.store.list())[0];
+    const proj=QF.makeProject(entry.name,entry.settings,entry);
+    const r=QF.parseProject(JSON.stringify(proj));ok(r.ok&&r.settings.fg===entry.settings.fg,'project JSON round trip');
+    /* legacy saved design still loads */
+    w.localStorage.setItem('qrforge_v2',JSON.stringify([{id:'qr_old',name:'Legacy',created:1,scanCount:3,scanLog:[1,2,3],thumbnail:'',settings:{url:'https://legacy.test',iconB64:null,iSz:22,iClear:'square',iInvert:false,dots:'dots',crn:'square',fg:'#112233',bg:'#ffffff',sz:380,pad:20,bRd:0,lbl:true,lblTxt:'Old',lblSz:16,lblC:'#0d0f14',ec:'Q'}}]));
+    d.getElementById('tD').click();d.getElementById('tL').click();await wait(300);
+    d.querySelector('[data-act=edit]').click();await wait(600);
+    ok(QF.app.S.url==='https://legacy.test'&&QF.app.S.dots==='dots'&&QF.app.S.frame==='none','legacy design loads with defaults for new settings');
+    ok($('vBadge').textContent.includes('Valid')||$('vBadge').textContent.includes('Warning'),'legacy design validates ('+$('vBadge').textContent+' / '+$('vDetail').textContent+' / '+$('checks').textContent+')');
+    /* exports */
+    const sc=()=>QF.buildScene(QF.app.S,QF.makeMatrix(QF.app.S.url,QF.app.S.ec),{});
+    const png=await QF.pngBlob(sc(),1000);ok(png.type==='image/png'&&png.size>500,'PNG blob (custom 1000 px)');
+    const svg=await QF.svgBlob(sc(),'t').text();ok(svg.includes('<svg')&&!svg.includes('<image'),'SVG is vector');
+    const pdf=QF.pdfBlob(sc(),{page:'A4',qrMm:60,marginMm:10,title:'t'});ok(pdf.size>1000,'PDF blob');
+    /* export dialog */
+    click('expBtn');await wait(100);ok($('expModal').classList.contains('on'),'export dialog opens');
+    ok(/^qr-forge_legacy_\d{8}-\d{6}$/.test($('eName').value),'default file name pattern ('+$('eName').value+')');
+    d.querySelector('#eFmt [data-v=pdf]').click();ok(!$('ePdfF').hidden&&$('ePngF').hidden,'PDF options show');
+    click('eCancel');
+    /* batch */
+    d.getElementById('nB').click();await wait(100);
+    const csv='name,url\nA,https://a.test\nB,\nC,nope\nD,https://a.test\n"E, Inc",https://e.test/?q=1';
+    const file=new w.File([csv],'b.csv',{type:'text/csv'});
+    const dt=new w.DataTransfer();dt.items.add(file);$('bFile').files=dt.files;$('bFile').dispatchEvent(new w.Event('change'));await wait(3000);
+    ok(d.querySelectorAll('#bBody tr').length===5,'batch lists 5 rows ['+$('bFileInfo').textContent+']');
+    ok($('bCount').textContent.startsWith('2 of 5'),'batch flags empty/invalid/duplicate ('+$('bCount').textContent+')');
+    click('bGen');await wait(1500);
+    ok(d.querySelectorAll('#bBody img').length===2,'batch renders thumbnails');
+    ok(!$('bZip').hidden,'ZIP button appears');
+    /* print */
+    d.getElementById('nP').click();await wait(500);
+    ok($('pCv').width>100,'print preview draws ('+$('pCv').width+'x'+$('pCv').height+')');
+    $('pLayout').value='flyer';$('pLayout').dispatchEvent(new w.Event('change'));await wait(300);
+    ok($('pW').value==='210'&&$('pH').value==='297','print preset sets page size');
+    /* theme + console errors */
+    click('themeBtn');ok(!!d.documentElement.dataset.theme,'theme toggles');
+    ok(errors.length===0,'no uncaught errors '+errors.join('; '));
+  }catch(e){fail++;rows.push('FAIL  threw '+e+' '+(e.stack||'').split('\n')[1]);}
+  rows.push(fail?`RESULT: ${fail} FAILED`:'RESULT: ALL PASSED');
+  document.getElementById('out').textContent=rows.join('\n');
+};
+</script></body></html>
