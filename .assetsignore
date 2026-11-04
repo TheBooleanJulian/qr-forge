@@ -7,3 +7,5 @@ LICENSE
 *.png
 node_modules
 .wrangler
+tests
+docs

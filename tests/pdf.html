@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>QR Forge PDF render test</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js"></script>
+<script src="../js/core.js"></script><script src="../js/scene.js"></script><script src="../js/draw.js"></script>
+<script src="../js/pdf.js"></script><script src="../js/print.js"></script>
+</head><body>
+<!-- Generates the app's PDFs, renders them with pdf.js (an independent PDF engine), then decodes the
+     rendered page with jsQR. Proves the vector output draws correctly and still scans.
+     Run: msedge --headless --allow-file-access-from-files --dump-dom --virtual-time-budget=60000 tests/pdf.html -->
+<pre id="out">running…</pre>
+<script>
+const URL_='https://accurova.com/menu?table=12&lang=en';
+const rows=[];let fail=0;
+window.addEventListener('error',e=>{document.getElementById('out').textContent+=' ERROR '+e.message;});
+window.addEventListener('unhandledrejection',e=>{document.getElementById('out').textContent+=' REJECT '+e.reason;});
+function mk(over){const S=Object.assign(QF.sanitize({}),over);S.url=URL_;return QF.buildScene(S,QF.makeMatrix(URL_,S.ec));}
+async function render(bytes){
+  const doc=await pdfjsLib.getDocument({data:bytes}).promise;
+  const pg=await doc.getPage(1),vp=pg.getViewport({scale:3});
+  const c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;
+  const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);
+  await pg.render({canvasContext:x,viewport:vp}).promise;
+  const k=Math.min(1,1100/Math.max(c.width,c.height)),s=document.createElement('canvas');
+  s.width=c.width*k;s.height=c.height*k;s.getContext('2d').drawImage(c,0,0,s.width,s.height);
+  const d=s.getContext('2d').getImageData(0,0,s.width,s.height);
+  const r=jsQR(d.data,d.width,d.height,{inversionAttempts:'attemptBoth'});
+  return{text:r&&r.data,w:vp.width/3,h:vp.height/3};
+}
+async function t(name,bytes,expectMm){
+  try{
+    const r=await render(bytes);
+    let ok=r.text===URL_;
+    let note='';
+    if(expectMm){const wmm=r.w/72*25.4,hmm=r.h/72*25.4;note=` page ${wmm.toFixed(1)}x${hmm.toFixed(1)} mm`;ok=ok&&Math.abs(wmm-expectMm[0])<.5&&Math.abs(hmm-expectMm[1])<.5;}
+    rows.push((ok?'PASS  ':'FAIL  ')+name+note);if(!ok)fail++;
+  }catch(e){fail++;rows.push('FAIL  '+name+' threw '+e);}
+}
+(async()=>{ 
+  const q=o=>({page:'A4',qrMm:70,marginMm:10,title:'t',...o});
+  await t('A4, solid, centred',QF.qrPDF(mk({}),q({})),[210,297]);
+  await t('A5, linear 3-stop gradient + frame',QF.qrPDF(mk({gradMode:'linear',stops:['#0b2545','#0a6e8a','#111827'],frame:'scan-me'}),q({page:'A5'})),[148,210]);
+  await t('Letter, radial gradient + dots + label',QF.qrPDF(mk({gradMode:'radial',stops:['#0b2545','#006d77'],dots:'dots',crn:'dot',lbl:true}),q({page:'Letter'})),[215.9,279.4]);
+  await t('fit page',QF.qrPDF(mk({}),q({page:'fit',qrMm:50,marginMm:8})),[66,66]);
+  await t('inverted colours',QF.qrPDF(mk({fg:'#ffffff',bg:'#0b0d12'}),q({})));
+  await t('padded logo-free finder colours',QF.qrPDF(mk({finOut:'#00797a',finIn:'#7a1f00'}),q({})));
+  const lay=QF.sanitizeLayout(QF.PRINT_PRESETS[0]);
+  await t('print: business card 90x55',QF.printPDF(mk({}),lay,'t'),[90,55]);
+  const sheet=QF.sanitizeLayout(Object.assign({},QF.PRINT_PRESETS[2],{cols:1,rows:1}));
+  await t('print: sticker 50x50',QF.printPDF(mk({}),sheet,'t'),[50,50]);
+  rows.push(fail?`RESULT: ${fail} FAILED`:'RESULT: ALL PASSED');
+  document.getElementById('out').textContent=rows.join('\n');
+})();
+</script></body></html>
