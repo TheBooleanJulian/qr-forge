@@ -4,323 +4,587 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>QR Forge — Accurova</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.js"></script>
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0b0d12;--sf:#13161e;--sf2:#1a1e28;
-  --bd:#252836;--bd2:#2f3345;
-  --tl:#00d4c8;--td:rgba(0,212,200,.12);--tg:rgba(0,212,200,.25);
-  --tx:#e4e6ef;--dm:#6b7280;--ft:#3a3f52;
-  --rd:#ff4d6d;--F:'Outfit',sans-serif;--M:'JetBrains Mono',monospace;
+/* Julian Unified UI tokens (from thebooleanjulian-branding/dist/tokens.css) */
+:root {
+  color-scheme: dark light;
+  --font-display: "Chakra Petch", "Rajdhani", system-ui, sans-serif;
+  --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --radius-sm: 2px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-pill: 999px;
+  --control-sm: 24px;
+  --control-md: 32px;
+  --control-lg: 40px;
+  --titlebar: 36px;
+  --statusbar: 24px;
+  --sidebar: 208px;
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 360ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --bg: #05060d;
+  --surface: #0b0e1a;
+  --surface-raised: #121629;
+  --surface-overlay: #1a2040;
+  --scrim: rgba(2, 3, 8, 0.72);
+  --line: #262d52;
+  --line-strong: #6370b6;
+  --ink: #e8ecff;
+  --ink-muted: #9ca5d4;
+  --ink-faint: #8089bd;
+  --cyan: #00e5ff;
+  --magenta: #ff2bd6;
+  --cyan-ink: #19e6ff;
+  --magenta-ink: #ff6be2;
+  --cyan-tint: rgba(0, 229, 255, 0.10);
+  --magenta-tint: rgba(255, 43, 214, 0.12);
+  --on-accent: #02101a;
+  --focus-ring: var(--cyan-ink);
+  --success: #2de2a6;
+  --warning: #ffc233;
+  --danger: #ff6482;
+  --glow-cyan: 0 0 0 1px rgba(0, 229, 255, 0.55), 0 0 18px rgba(0, 229, 255, 0.30);
+  --glow-magenta: 0 0 0 1px rgba(255, 43, 214, 0.55), 0 0 18px rgba(255, 43, 214, 0.30);
+  --elevation: 0 12px 32px rgba(0, 0, 0, 0.55);
 }
-html,body{height:100%;background:var(--bg);color:var(--tx);font-family:var(--F);font-size:14px;line-height:1.5;}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f3f5ff;
+    --surface: #ffffff;
+    --surface-raised: #eaeefc;
+    --surface-overlay: #dde3f9;
+    --scrim: rgba(11, 16, 48, 0.38);
+    --line: #cdd4f0;
+    --line-strong: #6c76a8;
+    --ink: #0b1030;
+    --ink-muted: #414a78;
+    --ink-faint: #5a6391;
+    --cyan: #00c8e8;
+    --magenta: #f01fc8;
+    --cyan-ink: #00657d;
+    --magenta-ink: #a8008a;
+    --cyan-tint: rgba(0, 101, 125, 0.08);
+    --magenta-tint: rgba(168, 0, 138, 0.08);
+    --on-accent: #02101a;
+    --success: #00704f;
+    --warning: #7f5400;
+    --danger: #c4003a;
+    --glow-cyan: 0 0 0 1px rgba(0, 101, 125, 0.60), 0 4px 14px rgba(0, 200, 232, 0.28);
+    --glow-magenta: 0 0 0 1px rgba(168, 0, 138, 0.60), 0 4px 14px rgba(240, 31, 200, 0.25);
+    --elevation: 0 12px 28px rgba(11, 16, 48, 0.16);
+  }
+}
+:root[data-theme="light"] {
+  --bg: #f3f5ff;
+  --surface: #ffffff;
+  --surface-raised: #eaeefc;
+  --surface-overlay: #dde3f9;
+  --scrim: rgba(11, 16, 48, 0.38);
+  --line: #cdd4f0;
+  --line-strong: #6c76a8;
+  --ink: #0b1030;
+  --ink-muted: #414a78;
+  --ink-faint: #5a6391;
+  --cyan: #00c8e8;
+  --magenta: #f01fc8;
+  --cyan-ink: #00657d;
+  --magenta-ink: #a8008a;
+  --cyan-tint: rgba(0, 101, 125, 0.08);
+  --magenta-tint: rgba(168, 0, 138, 0.08);
+  --on-accent: #02101a;
+  --success: #00704f;
+  --warning: #7f5400;
+  --danger: #c4003a;
+  --glow-cyan: 0 0 0 1px rgba(0, 101, 125, 0.60), 0 4px 14px rgba(0, 200, 232, 0.28);
+  --glow-magenta: 0 0 0 1px rgba(168, 0, 138, 0.60), 0 4px 14px rgba(240, 31, 200, 0.25);
+  --elevation: 0 12px 28px rgba(11, 16, 48, 0.16);
+}
+:root[data-theme="dark"] {
+  --bg: #05060d;
+  --surface: #0b0e1a;
+  --surface-raised: #121629;
+  --surface-overlay: #1a2040;
+  --scrim: rgba(2, 3, 8, 0.72);
+  --line: #262d52;
+  --line-strong: #6370b6;
+  --ink: #e8ecff;
+  --ink-muted: #9ca5d4;
+  --ink-faint: #8089bd;
+  --cyan: #00e5ff;
+  --magenta: #ff2bd6;
+  --cyan-ink: #19e6ff;
+  --magenta-ink: #ff6be2;
+  --cyan-tint: rgba(0, 229, 255, 0.10);
+  --magenta-tint: rgba(255, 43, 214, 0.12);
+  --on-accent: #02101a;
+  --focus-ring: var(--cyan-ink);
+  --success: #2de2a6;
+  --warning: #ffc233;
+  --danger: #ff6482;
+  --glow-cyan: 0 0 0 1px rgba(0, 229, 255, 0.55), 0 0 18px rgba(0, 229, 255, 0.30);
+  --glow-magenta: 0 0 0 1px rgba(255, 43, 214, 0.55), 0 0 18px rgba(255, 43, 214, 0.30);
+  --elevation: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--ink);font-family:var(--font-sans);font-size:14px;line-height:20px;}
+button,input,select{font:inherit;color:inherit;}
 .app{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
-.hdr{display:flex;align-items:center;gap:10px;padding:11px 18px;border-bottom:1px solid var(--bd);flex-shrink:0;}
-.logo{width:26px;height:26px;background:var(--tl);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.htitle{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
-.hright{margin-left:auto;display:flex;align-items:center;gap:7px;}
-.spill{display:none;align-items:center;gap:5px;background:var(--td);border:1px solid rgba(0,212,200,.2);border-radius:99px;padding:3px 10px;font-size:11px;color:var(--tl);font-weight:500;}
-.spill.on{display:flex;}
-.sdot2{width:6px;height:6px;border-radius:50%;background:var(--tl);}
-.badge{font-family:var(--M);font-size:10px;color:var(--tl);background:var(--td);border:1px solid rgba(0,212,200,.2);padding:2px 8px;border-radius:4px;}
+:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px;}
+svg.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+
+/* Title bar */
+.hdr{display:flex;align-items:center;gap:var(--space-3);height:var(--titlebar);padding:0 var(--space-4);background:var(--surface);border-bottom:1px solid var(--line);flex-shrink:0;position:relative;}
+.hdr::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,var(--cyan),var(--magenta));opacity:.7;}
+.logo{width:22px;height:22px;background:linear-gradient(90deg,var(--cyan),var(--magenta));border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.htitle{font-family:var(--font-display);font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;}
+.tagline{font-size:12.5px;color:var(--ink-muted);}
+.hright{margin-left:auto;display:flex;align-items:center;gap:var(--space-2);}
+.label,.sl2,.badge,.btn,.ptab,.sum{font-family:var(--font-display);font-size:11px;line-height:14px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;}
+.badge{display:inline-flex;align-items:center;gap:6px;height:var(--control-sm);padding:0 var(--space-2);border:1px solid var(--line-strong);border-radius:var(--radius-sm);color:var(--ink-muted);}
+.badge--cyan{color:var(--cyan-ink);background:var(--cyan-tint);border-color:var(--cyan-ink);}
+.badge--magenta{color:var(--magenta-ink);background:var(--magenta-tint);border-color:var(--magenta-ink);}
+.badge--success{color:var(--success);border-color:var(--success);}
+.badge--warning{color:var(--warning);border-color:var(--warning);}
+.badge--danger{color:var(--danger);border-color:var(--danger);}
+.badge[hidden]{display:none;}
+.live-dot{width:6px;height:6px;border-radius:var(--radius-pill);background:var(--magenta);box-shadow:var(--glow-magenta);}
+.iconbtn{display:inline-flex;align-items:center;justify-content:center;width:var(--control-sm);height:var(--control-sm);background:transparent;border:1px solid var(--line-strong);border-radius:var(--radius-md);color:var(--ink-muted);cursor:pointer;transition:all var(--dur-fast) var(--ease-out);}
+.iconbtn:hover{color:var(--cyan-ink);border-color:var(--cyan-ink);background:var(--cyan-tint);}
+
+/* Layout */
 .body{display:flex;flex:1;overflow:hidden;}
-.panel{width:286px;border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;}
-.ptabs{display:flex;border-bottom:1px solid var(--bd);flex-shrink:0;}
-.ptab{flex:1;padding:9px;border:none;background:transparent;color:var(--dm);font-family:var(--F);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;}
-.ptab.on{color:var(--tl);border-bottom-color:var(--tl);}
-.lbadge{background:var(--td);color:var(--tl);border-radius:99px;padding:1px 6px;font-size:10px;margin-left:4px;}
-#vD{flex:1;overflow-y:auto;}
-#vD::-webkit-scrollbar{width:3px;}
-#vD::-webkit-scrollbar-thumb{background:var(--bd2);}
-#vL{flex:1;overflow-y:auto;padding:8px;}
-#vL::-webkit-scrollbar{width:3px;}
-#vL::-webkit-scrollbar-thumb{background:var(--bd2);}
-.lib-empty{text-align:center;padding:36px 16px;color:var(--ft);font-size:12px;line-height:1.9;}
-.lib-empty strong{color:var(--tl);}
-.lcard{background:var(--sf);border:1px solid var(--bd);border-radius:9px;padding:10px;margin-bottom:7px;transition:border-color .15s;}
-.lcard.active{border-color:var(--tl);}
-.lcard-top{display:flex;gap:9px;}
-.lthumb{width:54px;height:54px;border-radius:5px;object-fit:cover;flex-shrink:0;background:var(--sf2);border:1px solid var(--bd);}
-.linfo{flex:1;min-width:0;}
-.lname{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px;}
-.lurl{font-family:var(--M);font-size:10px;color:var(--dm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;}
-.ldate{font-size:10px;color:var(--ft);}
-.lbot{display:flex;align-items:center;gap:5px;margin-top:8px;border-top:1px solid var(--bd);padding-top:8px;}
-.sctr{display:flex;align-items:center;gap:5px;flex:1;}
-.spulse{width:6px;height:6px;border-radius:50%;background:var(--tl);animation:pulse 2s infinite;}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.snum{font-family:var(--M);font-size:13px;font-weight:500;color:var(--tl);}
-.slbl{font-size:10px;color:var(--dm);}
-.xbtn{padding:4px 9px;border-radius:5px;font-family:var(--F);font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:transparent;color:var(--dm);transition:all .15s;white-space:nowrap;}
-.xbtn:hover{border-color:var(--tl);color:var(--tl);}
-.xbtn.del:hover{border-color:var(--rd);color:var(--rd);}
-.sec{padding:13px 17px;border-bottom:1px solid var(--bd);}
-.sl2{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--dm);margin-bottom:7px;}
-.sublbl{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--dm);margin-top:9px;margin-bottom:5px;}
-input[type=url],input[type=text]{width:100%;background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:8px 11px;color:var(--tx);font-family:var(--M);font-size:12px;outline:none;transition:border-color .15s,box-shadow .15s;}
-input[type=url]:focus,input[type=text]:focus{border-color:var(--tl);box-shadow:0 0 0 3px var(--td);}
-input[type=url].inv{border-color:var(--rd);}
-.ferr{font-size:10px;color:var(--rd);font-family:var(--M);display:none;margin-top:2px;}
-.upz{border:1.5px dashed var(--bd2);border-radius:8px;padding:13px;text-align:center;cursor:pointer;position:relative;overflow:hidden;transition:border-color .2s,background .2s;}
-.upz:hover,.upz.drag{border-color:var(--tl);background:var(--td);}
+.panel{width:320px;background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;}
+.ptabs{display:flex;border-bottom:1px solid var(--line);flex-shrink:0;}
+.ptab{flex:1;height:var(--control-lg);border:none;background:transparent;color:var(--ink-muted);cursor:pointer;position:relative;transition:color var(--dur-base) var(--ease-out);}
+.ptab:hover{color:var(--cyan-ink);}
+.ptab[aria-selected="true"]{color:var(--cyan-ink);}
+.ptab[aria-selected="true"]::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,var(--cyan),var(--magenta));}
+.lbadge{margin-left:6px;font-family:var(--font-mono);font-size:11.5px;letter-spacing:.02em;font-weight:500;color:var(--cyan-ink);}
+#vD,#vL{flex:1;overflow-y:auto;}
+#vL{padding:var(--space-2);}
+#vD::-webkit-scrollbar,#vL::-webkit-scrollbar{width:6px;}
+#vD::-webkit-scrollbar-thumb,#vL::-webkit-scrollbar-thumb{background:var(--line);border-radius:var(--radius-pill);}
+
+/* Collapsible sections */
+.sect{border-bottom:1px solid var(--line);}
+.sum{display:flex;align-items:center;gap:var(--space-2);height:var(--control-lg);padding:0 var(--space-4);cursor:pointer;list-style:none;color:var(--ink-muted);user-select:none;transition:color var(--dur-fast) var(--ease-out);}
+.sum::-webkit-details-marker{display:none;}
+.sum:hover{color:var(--cyan-ink);background:var(--cyan-tint);}
+.sum .chev{margin-left:auto;transition:transform var(--dur-base) var(--ease-out);}
+.sect[open]>.sum{color:var(--ink);}
+.sect[open]>.sum .chev{transform:rotate(180deg);}
+.sum .badge{height:20px;font-size:10px;letter-spacing:.1em;}
+.sect__body{padding:var(--space-1) var(--space-4) var(--space-4);display:flex;flex-direction:column;gap:var(--space-3);}
+.sublbl{font-family:var(--font-display);font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.hint{font-size:12.5px;line-height:18px;color:var(--ink-muted);}
+.tip{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border:1px solid var(--line-strong);border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:10px;letter-spacing:0;color:var(--ink-muted);cursor:help;text-transform:none;}
+
+/* Fields */
+.input,input[type=url],input[type=text],select{width:100%;height:var(--control-md);background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--radius-md);padding:0 var(--space-3);color:var(--ink);font-family:var(--font-mono);font-size:13px;outline:none;transition:border-color var(--dur-fast) var(--ease-out),box-shadow var(--dur-fast) var(--ease-out);}
+select{font-family:var(--font-sans);}
+input[type=url]:focus,input[type=text]:focus,select:focus{border-color:var(--cyan-ink);box-shadow:var(--glow-cyan);}
+input[aria-invalid="true"]{border-color:var(--danger);}
+.ferr{font-size:12.5px;color:var(--danger);display:none;margin-top:6px;}
+input::placeholder{color:var(--ink-faint);}
+.upz{border:1px dashed var(--line-strong);border-radius:var(--radius-md);padding:var(--space-3);text-align:center;cursor:pointer;position:relative;overflow:hidden;transition:border-color var(--dur-base) var(--ease-out),background var(--dur-base) var(--ease-out);}
+.upz:hover,.upz.drag,.upz:focus-within{border-color:var(--cyan-ink);background:var(--cyan-tint);}
 .upz input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
-.uph{pointer-events:none;}
-.upico{width:22px;height:22px;margin:0 auto 4px;opacity:.3;}
-.upt{font-size:11px;color:var(--dm);}
-.ups{font-size:10px;color:var(--ft);margin-top:1px;}
-.upprev{display:none;align-items:center;gap:8px;pointer-events:none;}
+.uph{pointer-events:none;color:var(--ink-muted);}
+.uph svg{width:20px;height:20px;margin:0 auto 4px;display:block;}
+.upt{font-size:12.5px;}
+.ups{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-faint);margin-top:2px;}
+.upprev{display:none;align-items:center;gap:var(--space-2);pointer-events:none;}
 .upprev.on{display:flex;}
-.pthumb{width:34px;height:34px;border-radius:5px;object-fit:cover;border:1px solid var(--bd);}
+.pthumb{width:34px;height:34px;border-radius:var(--radius-sm);object-fit:cover;border:1px solid var(--line);}
 .pinfo{text-align:left;flex:1;min-width:0;}
-.pinfo strong{font-size:11px;font-weight:500;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.pinfo small{color:var(--dm);font-size:10px;}
-.pclr{pointer-events:all;background:none;border:none;color:var(--dm);cursor:pointer;font-size:14px;line-height:1;padding:4px;transition:color .15s;}
-.pclr:hover{color:var(--rd);}
-.seg{display:flex;gap:3px;background:var(--sf2);padding:3px;border-radius:7px;}
-.sbtn{flex:1;padding:5px 3px;border-radius:5px;border:none;background:transparent;color:var(--dm);font-family:var(--F);font-size:11px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap;}
-.sbtn.on{background:var(--tl);color:#0b0d12;font-weight:700;}
-.sr{display:flex;align-items:center;gap:7px;margin-top:4px;}
-.sr .sl{font-size:11px;color:var(--dm);width:70px;flex-shrink:0;}
-.sr input[type=range]{flex:1;accent-color:var(--tl);}
-.sv{font-family:var(--M);font-size:11px;color:var(--tl);min-width:34px;text-align:right;}
-.crow{display:flex;gap:8px;}
-.citem{flex:1;}
-.citem label{font-size:11px;color:var(--dm);display:block;margin-bottom:3px;}
-.csw{display:flex;align-items:center;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:4px 9px;cursor:pointer;}
-.csw input[type=color]{width:18px;height:18px;border:none;border-radius:3px;background:none;cursor:pointer;padding:0;}
-.chex{font-family:var(--M);font-size:10px;color:var(--dm);}
-.trow{display:flex;align-items:center;justify-content:space-between;}
-.trow .tl{font-size:12px;color:var(--tx);}
-.tog{width:32px;height:17px;background:var(--sf2);border:1px solid var(--bd);border-radius:99px;position:relative;cursor:pointer;transition:background .2s,border-color .2s;}
-.tog.on{background:var(--tl);border-color:var(--tl);}
-.tog::after{content:'';position:absolute;width:11px;height:11px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform .2s;}
-.tog.on::after{transform:translateX(15px);}
-.lopts{display:none;flex-direction:column;gap:7px;margin-top:7px;}
-.lopts.on{display:flex;}
-.ecdesc{font-size:10px;color:var(--ft);font-family:var(--M);margin-top:4px;}
-.preview{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;gap:14px;position:relative;overflow:hidden;}
-.pbg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 40% at 60% 45%,rgba(0,212,200,.03) 0%,transparent 80%);pointer-events:none;}
-.cwrap{border-radius:12px;overflow:hidden;box-shadow:0 0 0 1px var(--bd),0 20px 60px rgba(0,0,0,.55);}
-canvas{display:block;}
-.arow{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;}
-.btn{padding:9px 17px;border-radius:7px;font-family:var(--F);font-size:12px;font-weight:600;letter-spacing:.03em;cursor:pointer;border:none;transition:all .15s;}
-.btn-p{background:var(--tl);color:#0b0d12;}
-.btn-p:hover{background:#00ffe8;transform:translateY(-1px);box-shadow:0 6px 20px var(--tg);}
-.btn-sv{background:var(--sf2);color:var(--tl);border:1px solid rgba(0,212,200,.3);}
-.btn-sv:hover{background:var(--td);transform:translateY(-1px);}
-.btn-g{background:var(--sf2);color:var(--tx);border:1px solid var(--bd);}
-.btn-g:hover{border-color:var(--tl);color:var(--tl);}
-.status{font-size:11px;color:var(--ft);font-family:var(--M);height:16px;text-align:center;}
-.status.ok{color:var(--tl);}
-.status.bad{color:var(--rd);}
+.pinfo strong{font-size:12.5px;font-weight:500;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pinfo small{color:var(--ink-muted);font-size:12px;}
+.pclr{pointer-events:all;position:relative;z-index:1;background:none;border:1px solid transparent;border-radius:var(--radius-sm);color:var(--ink-muted);cursor:pointer;padding:4px;display:inline-flex;}
+.pclr:hover{color:var(--danger);border-color:var(--danger);}
+.seg{display:flex;gap:2px;background:var(--surface-raised);padding:2px;border:1px solid var(--line);border-radius:var(--radius-md);}
+.sbtn{flex:1;height:26px;padding:0 4px;border-radius:var(--radius-sm);border:1px solid transparent;background:transparent;color:var(--ink-muted);font-size:12.5px;font-weight:500;cursor:pointer;transition:all var(--dur-fast) var(--ease-out);white-space:nowrap;}
+.sbtn:hover{color:var(--cyan-ink);}
+.sbtn.on{background:var(--surface-overlay);color:var(--ink);border-color:var(--cyan-ink);}
+.sr{display:flex;align-items:center;gap:var(--space-2);}
+.sr .sl{font-size:12.5px;color:var(--ink-muted);width:78px;flex-shrink:0;}
+.sr input[type=range]{flex:1;accent-color:var(--cyan-ink);min-width:0;}
+.sv{font-family:var(--font-mono);font-size:11.5px;font-weight:500;color:var(--cyan-ink);min-width:40px;text-align:right;}
+.crow{display:flex;gap:var(--space-2);}
+.citem{flex:1;min-width:0;}
+.citem>label{font-size:12.5px;color:var(--ink-muted);display:block;margin-bottom:4px;}
+.csw{display:flex;align-items:center;gap:var(--space-2);height:var(--control-md);background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--radius-md);padding:0 var(--space-2);cursor:pointer;}
+.csw:focus-within{border-color:var(--cyan-ink);box-shadow:var(--glow-cyan);}
+.csw input[type=color]{width:18px;height:18px;border:1px solid var(--line-strong);border-radius:var(--radius-sm);background:none;cursor:pointer;padding:0;}
+.chex{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-muted);}
+.trow{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);}
+.trow .tl{font-size:14px;}
+.tog{width:34px;height:18px;flex-shrink:0;background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--radius-pill);position:relative;cursor:pointer;transition:background var(--dur-base) var(--ease-out),border-color var(--dur-base) var(--ease-out);}
+.tog::after{content:'';position:absolute;width:12px;height:12px;background:var(--ink-muted);border-radius:var(--radius-pill);top:2px;left:2px;transition:transform var(--dur-base) var(--ease-out),background var(--dur-base) var(--ease-out);}
+.tog[aria-checked="true"]{background:var(--cyan);border-color:var(--cyan-ink);}
+.tog[aria-checked="true"]::after{transform:translateX(16px);background:var(--on-accent);}
+.opts{display:none;flex-direction:column;gap:var(--space-3);}
+.opts.on{display:flex;}
+
+/* Scan check list */
+.checks{list-style:none;display:flex;flex-direction:column;gap:6px;}
+.checks li{display:flex;gap:var(--space-2);font-size:12.5px;line-height:18px;}
+.g{font-family:var(--font-mono);font-weight:500;width:16px;height:16px;border:1px solid currentColor;border-radius:var(--radius-sm);display:inline-flex;align-items:center;justify-content:center;font-size:11px;line-height:1;flex-shrink:0;margin-top:1px;}
+.g.ok{color:var(--success);}.g.warn{color:var(--warning);}.g.fail{color:var(--danger);}.g.info{color:var(--cyan-ink);}
+
+/* Library */
+.lib-empty{text-align:center;padding:var(--space-7) var(--space-4);color:var(--ink-muted);font-size:12.5px;line-height:22px;}
+.lib-empty strong{color:var(--cyan-ink);font-weight:500;}
+.lib-note{padding:var(--space-2) 2px var(--space-1);font-family:var(--font-mono);font-size:11.5px;color:var(--ink-faint);text-align:center;}
+.lcard{background:var(--surface-raised);border:1px solid var(--line);border-radius:var(--radius-lg);padding:var(--space-3);margin-bottom:var(--space-2);transition:border-color var(--dur-fast) var(--ease-out);}
+.lcard.active{background:var(--surface-overlay);border-color:var(--cyan-ink);}
+.lcard-top{display:flex;gap:var(--space-3);}
+.lthumb{width:54px;height:54px;border-radius:var(--radius-sm);object-fit:cover;flex-shrink:0;background:var(--surface);border:1px solid var(--line);}
+.linfo{flex:1;min-width:0;}
+.lname{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lurl{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ldate{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-faint);}
+.lbot{display:flex;align-items:center;gap:var(--space-2);margin-top:var(--space-3);border-top:1px solid var(--line);padding-top:var(--space-3);}
+.sctr{display:flex;align-items:baseline;gap:6px;flex:1;min-width:0;}
+.snum{font-family:var(--font-mono);font-size:13px;font-weight:500;color:var(--cyan-ink);}
+.slbl{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.xbtn{height:var(--control-sm);padding:0 var(--space-2);border-radius:var(--radius-md);font-family:var(--font-display);font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;border:1px solid var(--line-strong);background:transparent;color:var(--ink-muted);transition:all var(--dur-fast) var(--ease-out);white-space:nowrap;}
+.xbtn:hover{border-color:var(--cyan-ink);color:var(--cyan-ink);background:var(--cyan-tint);}
+.xbtn.del:hover{border-color:var(--danger);color:var(--danger);background:transparent;}
+
+/* Preview */
+.preview{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:var(--space-6);gap:var(--space-4);position:relative;overflow:auto;
+  background-image:radial-gradient(var(--line) 1px,transparent 1px);background-size:24px 24px;}
+.cwrap{overflow:hidden;box-shadow:0 0 0 1px var(--line-strong),var(--elevation);max-width:100%;}
+.cwrap.tr{background-color:var(--surface-raised);background-image:linear-gradient(45deg,var(--surface-overlay) 25%,transparent 25%,transparent 75%,var(--surface-overlay) 75%),linear-gradient(45deg,var(--surface-overlay) 25%,transparent 25%,transparent 75%,var(--surface-overlay) 75%);background-size:16px 16px;background-position:0 0,8px 8px;}
+canvas{display:block;max-width:100%;height:auto;}
+.arow{display:flex;gap:var(--space-2);flex-wrap:wrap;justify-content:center;}
+.btn{display:inline-flex;align-items:center;gap:var(--space-2);height:var(--control-md);padding:0 var(--space-4);border-radius:var(--radius-md);cursor:pointer;background:var(--surface);color:var(--ink);border:1px solid var(--line-strong);transition:all var(--dur-fast) var(--ease-out);}
+.btn:hover{border-color:var(--cyan-ink);color:var(--cyan-ink);background:var(--cyan-tint);}
+.btn--primary{background:var(--cyan);color:var(--on-accent);border-color:var(--cyan);}
+.btn--primary:hover{background:var(--cyan);color:var(--on-accent);box-shadow:var(--glow-cyan);}
+.btn--ghost{background:transparent;}
+.status{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-faint);min-height:16px;text-align:center;}
+.status.ok{color:var(--success);}
+.status.bad{color:var(--danger);}
+
 /* Modal */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:100;align-items:center;justify-content:center;}
+.modal-overlay{display:none;position:fixed;inset:0;background:var(--scrim);z-index:100;align-items:center;justify-content:center;}
 .modal-overlay.on{display:flex;}
-.modal{background:var(--sf);border:1px solid var(--bd2);border-radius:12px;padding:22px 24px;width:300px;box-shadow:0 20px 60px rgba(0,0,0,.6);}
-.modal-title{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px;color:var(--tl);}
-.modal input[type=text]{width:100%;background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:9px 12px;color:var(--tx);font-family:var(--M);font-size:12px;outline:none;margin-bottom:14px;}
-.modal input[type=text]:focus{border-color:var(--tl);box-shadow:0 0 0 3px var(--td);}
-.modal-row{display:flex;gap:8px;justify-content:flex-end;}
-.modal-row .btn{padding:8px 16px;font-size:12px;}
+.modal{background:var(--surface-raised);border:1px solid var(--line-strong);border-radius:var(--radius-lg);padding:var(--space-5);width:320px;max-width:calc(100vw - 32px);box-shadow:var(--elevation);display:flex;flex-direction:column;gap:var(--space-4);}
+.modal-title{font-family:var(--font-display);font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan-ink);}
+.modal-row{display:flex;gap:var(--space-2);justify-content:flex-end;}
+
+@media (max-width:800px){
+  html,body{height:auto;}
+  .app{height:auto;overflow:visible;}
+  .body{flex-direction:column;overflow:visible;}
+  .panel{width:100%;border-right:none;border-bottom:1px solid var(--line);}
+  #vD,#vL{overflow:visible;}
+  .tagline{display:none;}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;}}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="hdr">
-    <div class="logo">
-      <svg width="15" height="15" viewBox="0 0 18 18" fill="none">
-        <rect x="2" y="2" width="5" height="5" rx="1" fill="#0b0d12"/>
-        <rect x="11" y="2" width="5" height="5" rx="1" fill="#0b0d12"/>
-        <rect x="2" y="11" width="5" height="5" rx="1" fill="#0b0d12"/>
-        <rect x="11" y="11" width="2" height="2" rx=".4" fill="#0b0d12"/>
-        <rect x="14.5" y="11" width="2" height="2" rx=".4" fill="#0b0d12"/>
-        <rect x="11" y="14.5" width="2" height="2" rx=".4" fill="#0b0d12"/>
+  <header class="hdr">
+    <div class="logo" aria-hidden="true">
+      <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
+        <rect x="2" y="2" width="5" height="5" rx="1" fill="#02101a"/>
+        <rect x="11" y="2" width="5" height="5" rx="1" fill="#02101a"/>
+        <rect x="2" y="11" width="5" height="5" rx="1" fill="#02101a"/>
+        <rect x="11" y="11" width="2" height="2" rx=".4" fill="#02101a"/>
+        <rect x="14.5" y="11" width="2" height="2" rx=".4" fill="#02101a"/>
+        <rect x="11" y="14.5" width="2" height="2" rx=".4" fill="#02101a"/>
       </svg>
     </div>
     <span class="htitle">QR Forge</span>
+    <span class="tagline">Create. Customise. Connect.</span>
     <div class="hright">
-      <div class="spill" id="sPill"><div class="sdot2"></div><span id="pillName">-</span></div>
-      <span class="badge">accurova</span>
+      <span class="badge badge--magenta" id="sPill" hidden><span class="live-dot"></span><span id="pillName">-</span></span>
+      <span class="badge badge--cyan">accurova</span>
+      <button class="iconbtn" id="themeBtn" type="button" aria-label="Switch theme" title="Switch theme">
+        <svg class="i" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+      </button>
     </div>
-  </div>
+  </header>
 
   <div class="body">
     <div class="panel">
-      <div class="ptabs">
-        <button class="ptab on" id="tD" onclick="tab('D')">Design</button>
-        <button class="ptab" id="tL" onclick="tab('L')">Library<span class="lbadge" id="libCnt">0</span></button>
+      <div class="ptabs" role="tablist" aria-label="Panel">
+        <button class="ptab" id="tD" role="tab" aria-selected="true" aria-controls="vD" type="button">Design</button>
+        <button class="ptab" id="tL" role="tab" aria-selected="false" aria-controls="vL" type="button" tabindex="-1">Library<span class="lbadge" id="libCnt">0</span></button>
       </div>
 
       <!-- DESIGN -->
-      <div id="vD">
-        <div class="sec">
-          <div class="sl2">Destination URL</div>
-          <input type="url" id="urlIn" placeholder="https://accurova.com" value="https://accurova.com" spellcheck="false">
-          <div class="ferr" id="urlErr">Enter a valid URL (include https://)</div>
-        </div>
+      <div id="vD" role="tabpanel" aria-labelledby="tD">
 
-        <div class="sec">
-          <div class="sl2">Centre Icon</div>
-          <div class="upz" id="upZ">
-            <input type="file" id="iconFile" accept="image/*">
-            <div class="uph" id="upH">
-              <svg class="upico" viewBox="0 0 24 24" fill="none">
-                <path d="M12 3v12M6 9l6-6 6 6M3 18v1a2 2 0 002 2h14a2 2 0 002-2v-1" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <div class="upt">Drop image or click to upload</div>
-              <div class="ups">PNG · JPG · SVG · WEBP</div>
-            </div>
-            <div class="upprev" id="upP">
-              <img class="pthumb" id="pThumb" src="" alt="">
-              <div class="pinfo"><strong id="pName">icon.png</strong><small>Click to change</small></div>
-              <button class="pclr" onclick="clearIcon(event)">✕</button>
+        <details class="sect" data-sec="dest" open>
+          <summary class="sum">Destination<svg class="i chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="sect__body">
+            <div>
+              <input type="url" id="urlIn" aria-label="Destination URL" aria-describedby="urlErr" placeholder="https://accurova.com" value="https://accurova.com" spellcheck="false">
+              <div class="ferr" id="urlErr" role="alert">x Enter a valid URL, including https://</div>
             </div>
           </div>
-          <div class="sr">
-            <span class="sl">Icon size</span>
-            <input type="range" id="iSz" min="10" max="35" value="22" step="1">
-            <span class="sv" id="iSzV">22%</span>
-          </div>
-          <div class="sublbl">Centre Clearance</div>
-          <div class="seg" id="clrSeg">
-            <button class="sbtn" data-v="padded">Padded</button>
-            <button class="sbtn on" data-v="square">Clean Square</button>
-          </div>
-          <div class="trow" style="margin-top:9px;">
-            <span class="tl">Invert icon colours</span>
-            <div class="tog" id="invTog" onclick="toggleInvert()"></div>
-          </div>
-        </div>
+        </details>
 
-        <div class="sec">
-          <div class="sl2">Dot Style</div>
-          <div class="seg" id="dotSeg">
-            <button class="sbtn" data-v="square">Square</button>
-            <button class="sbtn on" data-v="rounded">Rounded</button>
-            <button class="sbtn" data-v="dots">Dots</button>
-          </div>
-        </div>
-
-        <div class="sec">
-          <div class="sl2">Corner Style</div>
-          <div class="seg" id="crnSeg">
-            <button class="sbtn" data-v="square">Square</button>
-            <button class="sbtn on" data-v="rounded">Rounded</button>
-            <button class="sbtn" data-v="dot">Dot</button>
-          </div>
-        </div>
-
-        <div class="sec">
-          <div class="sl2">Colors</div>
-          <div class="crow">
-            <div class="citem"><label>Foreground</label>
-              <div class="csw"><input type="color" id="fgC" value="#0d0f14"><span class="chex" id="fgH">#0d0f14</span></div>
+        <details class="sect" data-sec="brand" open>
+          <summary class="sum">Branding<svg class="i chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="sect__body">
+            <div class="upz" id="upZ">
+              <input type="file" id="iconFile" accept="image/*" aria-label="Centre icon">
+              <div class="uph" id="upH">
+                <svg class="i" viewBox="0 0 24 24"><path d="M12 3v12M6 9l6-6 6 6M3 18v1a2 2 0 002 2h14a2 2 0 002-2v-1"/></svg>
+                <div class="upt">Drop image or click to upload</div>
+                <div class="ups">PNG · JPG · SVG · WEBP</div>
+              </div>
+              <div class="upprev" id="upP">
+                <img class="pthumb" id="pThumb" src="" alt="">
+                <div class="pinfo"><strong id="pName">icon.png</strong><small>Click to change</small></div>
+                <button class="pclr" type="button" onclick="clearIcon(event)" aria-label="Remove icon"><svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
             </div>
-            <div class="citem"><label>Background</label>
-              <div class="csw"><input type="color" id="bgC" value="#ffffff"><span class="chex" id="bgH">#ffffff</span></div>
+            <div class="sr" title="Icon width as a share of the QR area. Larger icons hide more modules.">
+              <span class="sl">Icon size</span>
+              <input type="range" id="iSz" aria-label="Icon size" min="10" max="35" value="22" step="1">
+              <span class="sv" id="iSzV">22%</span>
+            </div>
+            <div>
+              <div class="sublbl">Centre clearance <span class="tip" title="Clean square removes the modules under the icon. Padded keeps them and draws a backing plate behind the icon.">i</span></div>
+              <div class="seg" id="clrSeg">
+                <button class="sbtn" type="button" data-v="padded">Padded</button>
+                <button class="sbtn on" type="button" data-v="square">Clean square</button>
+              </div>
+            </div>
+            <div class="trow">
+              <span class="tl">Invert icon colours</span>
+              <button class="tog" type="button" role="switch" aria-checked="false" aria-label="Invert icon colours" data-key="iInvert"></button>
             </div>
           </div>
-        </div>
+        </details>
 
-        <div class="sec">
-          <div class="sl2">Canvas</div>
-          <div class="sr"><span class="sl">QR size</span><input type="range" id="qSz" min="200" max="600" step="10" value="380"><span class="sv" id="qSzV">380px</span></div>
-          <div class="sr"><span class="sl">Padding</span><input type="range" id="qPd" min="0" max="60" step="4" value="20"><span class="sv" id="qPdV">20px</span></div>
-          <div class="sr"><span class="sl">BG radius</span><input type="range" id="bRd" min="0" max="80" step="4" value="0"><span class="sv" id="bRdV">0px</span></div>
-        </div>
-
-        <div class="sec">
-          <div class="sl2">Label</div>
-          <div class="trow">
-            <span class="tl">Show label</span>
-            <div class="tog" id="lblTog" onclick="toggleLbl()"></div>
-          </div>
-          <div class="lopts" id="lblOpts">
-            <input type="text" id="lblTxt" placeholder="e.g. Scan to visit" value="Scan to visit">
-            <div class="sr"><span class="sl">Font size</span><input type="range" id="lblSz" min="10" max="32" step="1" value="16"><span class="sv" id="lblSzV">16px</span></div>
-            <div class="citem"><label>Label color</label>
-              <div class="csw"><input type="color" id="lblC" value="#0d0f14"><span class="chex" id="lblCH">#0d0f14</span></div>
+        <details class="sect" data-sec="look" open>
+          <summary class="sum">QR appearance<svg class="i chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="sect__body">
+            <div>
+              <div class="sublbl">Dot style</div>
+              <div class="seg" id="dotSeg">
+                <button class="sbtn" type="button" data-v="square">Square</button>
+                <button class="sbtn on" type="button" data-v="rounded">Rounded</button>
+                <button class="sbtn" type="button" data-v="dots">Dots</button>
+              </div>
+            </div>
+            <div>
+              <div class="sublbl">Corner style <span class="tip" title="Shape of the outer ring of the three corner finder patterns.">i</span></div>
+              <div class="seg" id="crnSeg">
+                <button class="sbtn" type="button" data-v="square">Square</button>
+                <button class="sbtn on" type="button" data-v="rounded">Rounded</button>
+                <button class="sbtn" type="button" data-v="dot">Dot</button>
+              </div>
+            </div>
+            <div>
+              <div class="sublbl">Finder centre <span class="tip" title="Shape of the solid block inside each finder pattern. Match follows the corner style.">i</span></div>
+              <div class="seg" id="eyeSeg">
+                <button class="sbtn on" type="button" data-v="match">Match</button>
+                <button class="sbtn" type="button" data-v="square">Square</button>
+                <button class="sbtn" type="button" data-v="rounded">Rounded</button>
+                <button class="sbtn" type="button" data-v="dot">Dot</button>
+              </div>
+            </div>
+            <div class="crow">
+              <div class="citem"><label for="fgC">Foreground</label>
+                <div class="csw"><input type="color" id="fgC" value="#0d0f14"><span class="chex" id="fgH">#0d0f14</span></div>
+              </div>
+              <div class="citem"><label for="bgC">Background</label>
+                <div class="csw"><input type="color" id="bgC" value="#ffffff"><span class="chex" id="bgH">#ffffff</span></div>
+              </div>
+            </div>
+            <div class="trow">
+              <span class="tl">Gradient</span>
+              <button class="tog" type="button" role="switch" aria-checked="false" aria-label="Gradient" data-key="grad"></button>
+            </div>
+            <div class="opts" id="gradOpts">
+              <div class="citem"><label for="fg2C">Second colour</label>
+                <div class="csw"><input type="color" id="fg2C" value="#0a6e8a"><span class="chex" id="fg2H">#0a6e8a</span></div>
+              </div>
+              <div class="sr"><span class="sl">Angle</span><input type="range" id="gAng" aria-label="Gradient angle" min="0" max="345" step="15" value="45"><span class="sv" id="gAngV">45°</span></div>
+              <div class="hint">Keep both colours dark against a light background so scanners can read the code.</div>
             </div>
           </div>
-        </div>
+        </details>
 
-        <div class="sec">
-          <div class="sl2">Error Correction</div>
-          <div class="seg" id="ecSeg">
-            <button class="sbtn" data-v="L">L 7%</button>
-            <button class="sbtn" data-v="M">M 15%</button>
-            <button class="sbtn" data-v="Q">Q 25%</button>
-            <button class="sbtn on" data-v="H">H 30%</button>
+        <details class="sect" data-sec="canvas">
+          <summary class="sum">Canvas<svg class="i chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="sect__body">
+            <div class="sr"><span class="sl">QR size</span><input type="range" id="qSz" aria-label="QR size" min="200" max="600" step="10" value="380"><span class="sv" id="qSzV">380px</span></div>
+            <div class="sr"><span class="sl">Padding</span><input type="range" id="qPd" aria-label="Padding" min="0" max="60" step="4" value="20"><span class="sv" id="qPdV">20px</span></div>
+            <div class="sr"><span class="sl">BG radius</span><input type="range" id="bRd" aria-label="Background radius" min="0" max="80" step="4" value="0"><span class="sv" id="bRdV">0px</span></div>
+            <div class="trow">
+              <span class="tl">Transparent background</span>
+              <button class="tog" type="button" role="switch" aria-checked="false" aria-label="Transparent background" data-key="transp"></button>
+            </div>
+            <div class="hint" id="trHint" hidden>Exports with an alpha channel. Place the code on a light surface.</div>
           </div>
-          <div class="ecdesc" id="ecDesc">H · 30% recovery — best with centre icon</div>
-        </div>
+        </details>
+
+        <details class="sect" data-sec="label">
+          <summary class="sum">Label<svg class="i chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="sect__body">
+            <div class="trow">
+              <span class="tl">Show label</span>
+              <button class="tog" type="button" role="switch" aria-checked="false" aria-label="Show label" data-key="lbl"></button>
+            </div>
+            <div class="opts" id="lblOpts">
+              <input type="text" id="lblTxt" aria-label="Label text" placeholder="e.g. Scan to visit" value="Scan to visit">
+              <div class="sr"><span class="sl">Font size</span><input type="range" id="lblSz" aria-label="Label font size" min="10" max="32" step="1" value="16"><span class="sv" id="lblSzV">16px</span></div>
+              <div class="citem"><label for="lblFont">Font</label>
+                <select id="lblFont">
+                  <option value="IBM Plex Sans">IBM Plex Sans</option>
+                  <option value="Chakra Petch">Chakra Petch</option>
+                  <option value="JetBrains Mono">JetBrains Mono</option>
+                  <option value="system-ui">System</option>
+                </select>
+              </div>
+              <div>
+                <div class="sublbl">Alignment</div>
+                <div class="seg" id="alSeg">
+                  <button class="sbtn" type="button" data-v="left">Left</button>
+                  <button class="sbtn on" type="button" data-v="center">Centre</button>
+                  <button class="sbtn" type="button" data-v="right">Right</button>
+                </div>
+              </div>
+              <div class="citem"><label for="lblC">Label colour</label>
+                <div class="csw"><input type="color" id="lblC" value="#0d0f14"><span class="chex" id="lblCH">#0d0f14</span></div>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <details class="sect" data-sec="adv">
+          <summary class="sum">Advanced<span class="badge" id="vBadgeS" hidden></span><svg class="i chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="sect__body">
+            <div>
+              <div class="sublbl">Error correction <span class="tip" title="Higher levels let the code survive damage or a covering icon, but make the pattern denser. Use Q or H with a centre icon.">i</span></div>
+              <div class="seg" id="ecSeg">
+                <button class="sbtn" type="button" data-v="L">L 7%</button>
+                <button class="sbtn" type="button" data-v="M">M 15%</button>
+                <button class="sbtn" type="button" data-v="Q">Q 25%</button>
+                <button class="sbtn on" type="button" data-v="H">H 30%</button>
+              </div>
+              <div class="hint" id="ecDesc" style="margin-top:6px;">H · 30% recovery — best with centre icon</div>
+            </div>
+            <div class="sr" title="Extra empty modules around the code, added inside the padding. The QR standard asks for 4 modules in total.">
+              <span class="sl">Quiet zone</span>
+              <input type="range" id="qZ" aria-label="Quiet zone" min="0" max="8" step="1" value="0">
+              <span class="sv" id="qZV">0 mod</span>
+            </div>
+            <div>
+              <div class="sublbl">Scan check</div>
+              <ul class="checks" id="checks" aria-live="polite"></ul>
+            </div>
+          </div>
+        </details>
       </div>
 
       <!-- LIBRARY -->
-      <div id="vL" style="display:none;">
-        <div style="padding:8px 2px 4px;font-size:10px;color:var(--ft);font-family:var(--M);text-align:center;">Stored locally in this browser</div>
+      <div id="vL" role="tabpanel" aria-labelledby="tL" style="display:none;">
+        <div class="lib-note">Stored locally in this browser</div>
         <div id="libList"></div>
       </div>
     </div>
 
     <!-- PREVIEW -->
-    <div class="preview">
-
-      <div class="pbg"></div>
-      <div class="cwrap"><canvas id="qrC" width="380" height="380"></canvas></div>
+    <main class="preview">
+      <div class="cwrap" id="cwrap"><canvas id="qrC" width="380" height="380" role="img" aria-label="QR code preview"></canvas></div>
+      <span class="badge" id="vBadge" hidden></span>
       <div class="arow">
-        <button class="btn btn-p" onclick="dlPNG()">↓ Export PNG</button>
-        <button class="btn btn-sv" id="saveBtn" onclick="saveQR()">⊕ Save QR</button>
-        <button class="btn btn-g" onclick="copyQR()">⎘ Copy</button>
+        <button class="btn btn--primary" type="button" onclick="dlPNG()">Export PNG</button>
+        <button class="btn" type="button" id="saveBtn" onclick="saveQR()">Save QR</button>
+        <button class="btn btn--ghost" type="button" onclick="copyQR()">Copy</button>
       </div>
-      <div class="status" id="st"></div>
-    </div>
+      <div class="status" id="st" role="status"></div>
+    </main>
   </div>
 </div>
+
 <!-- Save name modal -->
 <div class="modal-overlay" id="saveModal">
-  <div class="modal">
-    <div class="modal-title">Name this QR</div>
-    <input type="text" id="modalName" placeholder="e.g. Event Booth 2025" maxlength="60">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <div class="modal-title" id="mTitle">Name this QR</div>
+    <input type="text" id="modalName" aria-label="QR name" placeholder="e.g. Event Booth 2026" maxlength="60">
     <div class="modal-row">
-      <button class="btn btn-g" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-p" onclick="confirmSave()">Save</button>
+      <button class="btn" type="button" onclick="closeModal()">Cancel</button>
+      <button class="btn btn--primary" type="button" onclick="confirmSave()">Save</button>
     </div>
   </div>
 </div>
 
 <script>
-const S={
+/* ---------- State ---------- */
+const DEFAULTS={
   url:'https://accurova.com',
-  iconImg:null,iconB64:null,invImg:null,
   iSz:22,iClear:'square',iInvert:false,
-  dots:'rounded',crn:'rounded',
-  fg:'#0d0f14',bg:'#ffffff',
-  sz:380,pad:20,bRd:0,
-  lbl:false,lblTxt:'Scan to visit',lblSz:16,lblC:'#0d0f14',
-  ec:'H',sid:null
+  dots:'rounded',crn:'rounded',eye:'match',
+  fg:'#0d0f14',bg:'#ffffff',grad:false,fg2:'#0a6e8a',gAng:45,
+  sz:380,pad:20,bRd:0,transp:false,qZ:0,
+  lbl:false,lblTxt:'Scan to visit',lblSz:16,lblFont:'IBM Plex Sans',lblAl:'center',lblC:'#0d0f14',
+  ec:'H'
 };
+const S=Object.assign({},DEFAULTS,{iconImg:null,iconB64:null,invImg:null,sid:null});
+const KEYS=Object.keys(DEFAULTS);
 let rt=null;
 const sched=()=>{clearTimeout(rt);rt=setTimeout(render,55);};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store={
+  get(k){try{return localStorage.getItem(k);}catch{return null;}},
+  set(k,v){try{localStorage.setItem(k,v);}catch{}}
+};
 
-function rr(ctx,x,y,w,h,r){
+/* ---------- Drawing helpers ---------- */
+function rp(ctx,x,y,w,h,r){
   r=Math.min(r,w/2,h/2);
-  if(r<=0){ctx.fillRect(x,y,w,h);return;}
-  ctx.beginPath();
+  if(r<=0){ctx.rect(x,y,w,h);return;}
   ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
   ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
   ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);
   ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);
-  ctx.closePath();ctx.fill();
+  ctx.closePath();
 }
-function finder(ctx,x,y,cs,sty,fg,bg){
+function rr(ctx,x,y,w,h,r){ctx.beginPath();rp(ctx,x,y,w,h,r);ctx.fill();}
+function finder(ctx,x,y,cs,sty,eye,fill){
   const r7=sty==='square'?0:sty==='rounded'?cs*1.3:cs*7*.5;
-  const r3=sty==='square'?0:sty==='rounded'?cs*.65:cs*3*.5;
-  ctx.fillStyle=fg;rr(ctx,x,y,7*cs,7*cs,r7);
-  ctx.fillStyle=bg;rr(ctx,x+cs,y+cs,5*cs,5*cs,Math.max(0,r7-cs*.5));
-  ctx.fillStyle=fg;rr(ctx,x+2*cs,y+2*cs,3*cs,3*cs,r3);
+  const es=eye==='match'?sty:eye;
+  const r3=es==='square'?0:es==='rounded'?cs*.65:cs*3*.5;
+  ctx.fillStyle=fill;
+  ctx.beginPath();
+  rp(ctx,x,y,7*cs,7*cs,r7);
+  rp(ctx,x+cs,y+cs,5*cs,5*cs,Math.max(0,r7-cs*.5));
+  ctx.fill('evenodd');
+  rr(ctx,x+2*cs,y+2*cs,3*cs,3*cs,r3);
+}
+function paintFor(ctx,x0,y0,size){
+  if(!S.grad)return S.fg;
+  const a=S.gAng*Math.PI/180,cx=x0+size/2,cy=y0+size/2,dx=Math.cos(a)*size/2,dy=Math.sin(a)*size/2;
+  const g=ctx.createLinearGradient(cx-dx,cy-dy,cx+dx,cy+dy);
+  g.addColorStop(0,S.fg);g.addColorStop(1,S.fg2);return g;
 }
 function getIcon(){
   if(!S.iconImg)return null;
@@ -334,19 +598,23 @@ function getIcon(){
   x.putImageData(d,0,0);
   const inv=new Image();inv.src=c.toDataURL();S.invImg=inv;return inv;
 }
+
+/* ---------- Render ---------- */
+let layout={n:0,cs:0};
 function render(){
   const url=S.url.trim();if(!url)return;
-  let qr;try{qr=qrcode(0,S.ec);qr.addData(url);qr.make();}catch(e){return;}
+  let qr;try{qr=qrcode(0,S.ec);qr.addData(url);qr.make();}catch(e){setStatus('Could not encode this URL. Shorten it or lower error correction.',false);return;}
   const n=qr.getModuleCount();
   const lH=S.lbl?(S.lblSz*1.6+16):0;
   const cw=S.sz,ch=S.sz+lH;
-  const cv=document.getElementById('qrC');
+  const cv=$('qrC');
   cv.width=cw;cv.height=ch;
   const ctx=cv.getContext('2d');
   ctx.clearRect(0,0,cw,ch);
-  ctx.fillStyle=S.bg;
-  if(S.bRd>0)rr(ctx,0,0,cw,ch,S.bRd);else ctx.fillRect(0,0,cw,ch);
-  const area=S.sz-2*S.pad,cs=area/n,ox=S.pad,oy=S.pad;
+  if(!S.transp){ctx.fillStyle=S.bg;rr(ctx,0,0,cw,ch,S.bRd);}
+  const cs=(S.sz-2*S.pad)/(n+2*S.qZ),area=cs*n,ox=S.pad+S.qZ*cs,oy=ox;
+  layout={n,cs};
+  const fill=paintFor(ctx,ox,oy,area);
   let iz=null;
   if(S.iconImg&&S.iClear==='square'){
     const isz=area*(S.iSz/100);
@@ -354,40 +622,111 @@ function render(){
   }
   const fc=new Set();
   [[0,0],[0,n-7],[n-7,0]].forEach(([r0,c0])=>{for(let r=r0;r<r0+7;r++)for(let c=c0;c<c0+7;c++)fc.add(r*200+c);});
+  ctx.fillStyle=fill;
   for(let r=0;r<n;r++)for(let c=0;c<n;c++){
     if(fc.has(r*200+c)||!qr.isDark(r,c))continue;
     const dx=ox+c*cs,dy=oy+r*cs;
     if(iz&&dx<iz.x+iz.w&&dx+cs>iz.x&&dy<iz.y+iz.h&&dy+cs>iz.y)continue;
-    ctx.fillStyle=S.fg;
     if(S.dots==='dots'){ctx.beginPath();ctx.arc(dx+cs/2,dy+cs/2,cs*.44,0,Math.PI*2);ctx.fill();}
     else if(S.dots==='rounded')rr(ctx,dx+.5,dy+.5,cs-1,cs-1,cs*.3);
     else ctx.fillRect(dx,dy,cs,cs);
   }
-  finder(ctx,ox,oy,cs,S.crn,S.fg,S.bg);
-  finder(ctx,ox+(n-7)*cs,oy,cs,S.crn,S.fg,S.bg);
-  finder(ctx,ox,oy+(n-7)*cs,cs,S.crn,S.fg,S.bg);
+  finder(ctx,ox,oy,cs,S.crn,S.eye,fill);
+  finder(ctx,ox+(n-7)*cs,oy,cs,S.crn,S.eye,fill);
+  finder(ctx,ox,oy+(n-7)*cs,cs,S.crn,S.eye,fill);
   const icon=getIcon();
   if(icon){
     const isz=area*(S.iSz/100);
     const ix=ox+(area-isz)/2,iy=oy+(area-isz)/2;
     if(S.iClear==='padded'){
-      const bp=isz*.13;ctx.fillStyle=S.bg;
+      const bp=isz*.13;
+      ctx.save();
+      if(S.transp){ctx.globalCompositeOperation='destination-out';ctx.fillStyle='#000';}
+      else ctx.fillStyle=S.bg;
       rr(ctx,ix-bp,iy-bp,isz+bp*2,isz+bp*2,(isz+bp*2)*.2);
+      ctx.restore();
     }
-    ctx.save();rr(ctx,ix,iy,isz,isz,isz*.15);ctx.clip();
+    ctx.save();ctx.beginPath();rp(ctx,ix,iy,isz,isz,isz*.15);ctx.clip();
     ctx.drawImage(icon,ix,iy,isz,isz);ctx.restore();
   }
   if(S.lbl&&S.lblTxt){
     ctx.fillStyle=S.lblC;
-    ctx.font=`500 ${S.lblSz}px 'Outfit',sans-serif`;
-    ctx.textAlign='center';ctx.textBaseline='top';
-    ctx.fillText(S.lblTxt,cw/2,S.sz+S.lblSz*.15);
+    ctx.font=`500 ${S.lblSz}px '${S.lblFont}',system-ui,sans-serif`;
+    ctx.textBaseline='top';
+    const al=S.lblAl,x=al==='left'?S.pad:al==='right'?cw-S.pad:cw/2;
+    ctx.textAlign=al;
+    ctx.fillText(S.lblTxt,x,S.sz+S.lblSz*.15);
   }
+  $('cwrap').classList.toggle('tr',S.transp);
+  $('cwrap').style.borderRadius=S.bRd+'px';
+  runChecks(cv,url);
 }
 
-/* Icon */
-const iconFileEl=document.getElementById('iconFile');
-const upZ=document.getElementById('upZ');
+/* ---------- Scan check ---------- */
+function lum(hex){
+  const v=[1,3,5].map(i=>parseInt(hex.substr(i,2),16)/255).map(c=>c<=.03928?c/12.92:Math.pow((c+.055)/1.055,2.4));
+  return .2126*v[0]+.7152*v[1]+.0722*v[2];
+}
+function contrast(a,b){const x=lum(a),y=lum(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);}
+const REC={L:.07,M:.15,Q:.25,H:.30};
+let scanRes=null,scanTok=0;
+function staticChecks(){
+  const out=[];
+  const{n,cs}=layout;
+  const cols=S.grad?[S.fg,S.fg2]:[S.fg];
+  if(S.transp){
+    out.push({l:'warn',t:'Transparent background: contrast depends on the surface you place the code on.'});
+  }else{
+    const c=Math.min(...cols.map(f=>contrast(f,S.bg)));
+    const inverted=cols.some(f=>lum(f)>lum(S.bg));
+    const txt='Contrast '+c.toFixed(1)+':1';
+    if(c<3)out.push({l:'fail',t:txt+'. Too low to scan. Darken the foreground or lighten the background.'});
+    else if(c<4.5)out.push({l:'warn',t:txt+'. Readable, but higher contrast scans faster.'});
+    else out.push({l:'ok',t:txt+'.'});
+    if(inverted)out.push({l:'warn',t:'Light code on a dark background. Some scanners cannot read inverted codes.'});
+  }
+  if(S.iconImg){
+    const f=S.iClear==='padded'?Math.pow(S.iSz/100*1.26,2):Math.pow(S.iSz/100,2);
+    const rec=REC[S.ec];
+    const pct=Math.round(f*100)+'% of the code hidden, '+S.ec+' recovers '+Math.round(rec*100)+'%.';
+    if(f>rec)out.push({l:'fail',t:pct+' Shrink the icon or raise error correction.'});
+    else if(f>rec*.6)out.push({l:'warn',t:pct+' Close to the limit. Test with a phone.'});
+    else out.push({l:'ok',t:'Icon covers '+Math.round(f*100)+'% of the code, within '+S.ec+' recovery.'});
+  }
+  const q=n?(S.pad/cs+S.qZ):0;
+  if(n){
+    const qt='Quiet zone '+q.toFixed(1)+' modules.';
+    if(q<1)out.push({l:'fail',t:qt+' Add padding or quiet zone; the standard asks for 4.'});
+    else if(q<1.5)out.push({l:'warn',t:qt+' Below 1.5, some scanners miss the code. The standard asks for 4.'});
+    else out.push({l:'ok',t:qt});
+    if(cs<3)out.push({l:'warn',t:'Modules are '+cs.toFixed(1)+' px. Increase the QR size or shorten the URL.'});
+  }
+  return out;
+}
+function runChecks(cv,url){
+  const tok=++scanTok;
+  scanRes=null;showChecks();
+  if(!('BarcodeDetector' in window)){scanRes={l:'info',t:'Decode test unavailable in this browser. Test with a phone before printing.'};showChecks();return;}
+  const t=document.createElement('canvas');t.width=cv.width;t.height=cv.height;
+  const x=t.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,t.width,t.height);x.drawImage(cv,0,0);
+  new BarcodeDetector({formats:['qr_code']}).detect(t).then(r=>{
+    if(tok!==scanTok)return;
+    const hit=r.find(b=>b.rawValue===url);
+    scanRes=hit?{l:'ok',t:'Decode test passed.'}:{l:'fail',t:'Decode test failed. This browser could not read the code.'};
+    showChecks();
+  }).catch(()=>{if(tok!==scanTok)return;scanRes={l:'info',t:'Decode test unavailable. Test with a phone before printing.'};showChecks();});
+}
+function showChecks(){
+  const list=staticChecks();if(scanRes)list.push(scanRes);
+  const G={ok:'✓',warn:'!',fail:'x',info:'i'};
+  $('checks').innerHTML=list.map(c=>`<li><span class="g ${c.l}" aria-hidden="true">${G[c.l]}</span><span>${esc(c.t)}</span></li>`).join('');
+  const lv=list.some(c=>c.l==='fail')?'fail':list.some(c=>c.l==='warn')?'warn':'ok';
+  const B={ok:['badge badge--success','✓ Scannable'],warn:['badge badge--warning','! Check settings'],fail:['badge badge--danger','x May not scan']}[lv];
+  [$('vBadge'),$('vBadgeS')].forEach(b=>{b.hidden=false;b.className=B[0]+(b.id==='vBadgeS'?' ':'');b.textContent=B[1];});
+}
+
+/* ---------- Icon ---------- */
+const iconFileEl=$('iconFile'),upZ=$('upZ');
 upZ.addEventListener('dragover',e=>{e.preventDefault();upZ.classList.add('drag');});
 upZ.addEventListener('dragleave',()=>upZ.classList.remove('drag'));
 upZ.addEventListener('drop',e=>{e.preventDefault();upZ.classList.remove('drag');const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))loadIcon(f);});
@@ -399,10 +738,10 @@ function loadIcon(file){
     img.onload=()=>{
       S.iconImg=img;S.invImg=null;
       S.iconB64=compress(img);
-      document.getElementById('pThumb').src=ev.target.result;
-      document.getElementById('pName').textContent=file.name;
-      document.getElementById('upH').style.display='none';
-      document.getElementById('upP').classList.add('on');
+      $('pThumb').src=ev.target.result;
+      $('pName').textContent=file.name;
+      $('upH').style.display='none';
+      $('upP').classList.add('on');
       render();
     };img.src=ev.target.result;
   };r.readAsDataURL(file);
@@ -415,109 +754,132 @@ function compress(img){
 }
 function clearIcon(e){
   e.stopPropagation();S.iconImg=null;S.iconB64=null;S.invImg=null;iconFileEl.value='';
-  document.getElementById('upP').classList.remove('on');document.getElementById('upH').style.display='';render();
+  $('upP').classList.remove('on');$('upH').style.display='';render();
 }
-function toggleInvert(){S.iInvert=!S.iInvert;S.invImg=null;document.getElementById('invTog').classList.toggle('on',S.iInvert);render();}
 
-/* Sliders */
-const slMap={iSz:'iSz',qSz:'sz',qPd:'pad',bRd:'bRd',lblSz:'lblSz'};
-const slSfx={iSz:'%',qSz:'px',qPd:'px',bRd:'px',lblSz:'px'};
-['iSz','qSz','qPd','bRd','lblSz'].forEach(id=>{
-  document.getElementById(id).addEventListener('input',e=>{
-    S[slMap[id]]=+e.target.value;
-    document.getElementById(id+'V').textContent=e.target.value+slSfx[id];sched();
-  });
+/* ---------- Controls ---------- */
+const SLIDERS=[['iSz','iSz','%'],['qSz','sz','px'],['qPd','pad','px'],['bRd','bRd','px'],['lblSz','lblSz','px'],['qZ','qZ',' mod'],['gAng','gAng','°']];
+SLIDERS.forEach(([id,k,sfx])=>{
+  $(id).addEventListener('input',e=>{S[k]=+e.target.value;$(id+'V').textContent=e.target.value+sfx;sched();});
 });
-
-/* Segs */
-function bindSeg(id,key,cb){
-  document.getElementById(id).querySelectorAll('.sbtn').forEach(b=>{
-    b.addEventListener('click',()=>{
-      document.getElementById(id).querySelectorAll('.sbtn').forEach(x=>x.classList.remove('on'));
-      b.classList.add('on');S[key]=b.dataset.v;if(cb)cb(b.dataset.v);sched();
-    });
-  });
-}
-bindSeg('dotSeg','dots');bindSeg('crnSeg','crn');bindSeg('clrSeg','iClear');
+const SEGS=[['dotSeg','dots'],['crnSeg','crn'],['eyeSeg','eye'],['clrSeg','iClear'],['ecSeg','ec'],['alSeg','lblAl']];
 const ecD={L:'L · 7% recovery — smallest QR',M:'M · 15% recovery — general use',Q:'Q · 25% recommended with icon',H:'H · 30% recovery — best with centre icon'};
-bindSeg('ecSeg','ec',v=>document.getElementById('ecDesc').textContent=ecD[v]);
-
-/* Colors */
-[['fgC','fgH','fg'],['bgC','bgH','bg'],['lblC','lblCH','lblC']].forEach(([id,hid,k])=>{
-  document.getElementById(id).addEventListener('input',e=>{S[k]=e.target.value;document.getElementById(hid).textContent=e.target.value;sched();});
+SEGS.forEach(([id,k])=>{
+  $(id).querySelectorAll('.sbtn').forEach(b=>b.addEventListener('click',()=>{
+    S[k]=b.dataset.v;
+    if(k==='ec')$('ecDesc').textContent=ecD[S.ec];
+    syncSegs();sched();
+  }));
 });
-
-/* URL */
-document.getElementById('urlIn').addEventListener('input',e=>{
+function syncSegs(){
+  SEGS.forEach(([id,k])=>$(id).querySelectorAll('.sbtn').forEach(b=>{
+    const on=b.dataset.v===S[k];b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);
+  }));
+}
+const COLORS=[['fgC','fgH','fg'],['fg2C','fg2H','fg2'],['bgC','bgH','bg'],['lblC','lblCH','lblC']];
+COLORS.forEach(([id,hid,k])=>{
+  $(id).addEventListener('input',e=>{S[k]=e.target.value;$(hid).textContent=e.target.value;sched();});
+});
+document.querySelectorAll('.tog').forEach(t=>t.addEventListener('click',()=>{
+  const k=t.dataset.key;S[k]=!S[k];if(k==='iInvert')S.invImg=null;syncToggles();sched();
+}));
+function syncToggles(){
+  document.querySelectorAll('.tog').forEach(t=>t.setAttribute('aria-checked',!!S[t.dataset.key]));
+  $('lblOpts').classList.toggle('on',S.lbl);
+  $('gradOpts').classList.toggle('on',S.grad);
+  $('trHint').hidden=!S.transp;
+}
+$('lblTxt').addEventListener('input',e=>{S.lblTxt=e.target.value;sched();});
+$('lblFont').addEventListener('change',e=>{S.lblFont=e.target.value;loadFont();sched();});
+function loadFont(){
+  if(S.lblFont==='system-ui'||!document.fonts)return;
+  document.fonts.load(`500 ${S.lblSz}px "${S.lblFont}"`).then(sched).catch(()=>{});
+}
+$('urlIn').addEventListener('input',e=>{
   const v=e.target.value.trim();let ok=false;try{new URL(v);ok=true;}catch{}
-  document.getElementById('urlErr').style.display=ok||!v?'none':'block';
-  e.target.classList.toggle('inv',!ok&&!!v);
+  $('urlErr').style.display=ok||!v?'none':'block';
+  e.target.setAttribute('aria-invalid',!ok&&!!v);
   if(ok||!v){S.url=v||'';sched();}
 });
 
-function toggleLbl(){
-  S.lbl=!S.lbl;document.getElementById('lblTog').classList.toggle('on',S.lbl);
-  document.getElementById('lblOpts').classList.toggle('on',S.lbl);sched();
-}
-document.getElementById('lblTxt').addEventListener('input',e=>{S.lblTxt=e.target.value;sched();});
+/* Collapsible sections: remember open state */
+const SECKEY='qrforge_sections';
+let secState={};try{secState=JSON.parse(store.get(SECKEY)||'{}');}catch{}
+document.querySelectorAll('details.sect').forEach(d=>{
+  const k=d.dataset.sec;if(k in secState)d.open=!!secState[k];
+  d.addEventListener('toggle',()=>{secState[k]=d.open;store.set(SECKEY,JSON.stringify(secState));});
+});
 
 /* Tabs */
 function tab(t){
-  document.getElementById('vD').style.display=t==='D'?'':'none';
-  document.getElementById('vL').style.display=t==='L'?'':'none';
-  document.getElementById('tD').classList.toggle('on',t==='D');
-  document.getElementById('tL').classList.toggle('on',t==='L');
+  $('vD').style.display=t==='D'?'':'none';
+  $('vL').style.display=t==='L'?'':'none';
+  [['tD','D'],['tL','L']].forEach(([id,v])=>{
+    const on=t===v;$(id).setAttribute('aria-selected',on);$(id).tabIndex=on?0:-1;
+  });
   if(t==='L')renderLib();
 }
+$('tD').addEventListener('click',()=>tab('D'));
+$('tL').addEventListener('click',()=>tab('L'));
+document.querySelector('.ptabs').addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowLeft'){const t=e.target.id==='tD'?'L':'D';tab(t);$('t'+t).focus();}
+});
 
-/* Library */
+/* Theme */
+const root=document.documentElement;
+const savedTheme=store.get('qrforge_theme');if(savedTheme==='dark'||savedTheme==='light')root.dataset.theme=savedTheme;
+$('themeBtn').addEventListener('click',()=>{
+  const cur=root.dataset.theme||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');
+  const next=cur==='dark'?'light':'dark';root.dataset.theme=next;store.set('qrforge_theme',next);
+});
+
+/* ---------- Library ---------- */
 const DB='qrforge_v2';
 const loadLib=()=>{try{return JSON.parse(localStorage.getItem(DB)||'[]');}catch{return[];}};
 const saveLib=l=>localStorage.setItem(DB,JSON.stringify(l));
-const updCnt=()=>document.getElementById('libCnt').textContent=loadLib().length;
-const mkThumb=()=>{const s=document.getElementById('qrC'),tc=document.createElement('canvas');tc.width=80;tc.height=80;tc.getContext('2d').drawImage(s,0,0,s.width,s.height,0,0,80,80);return tc.toDataURL('image/png');};
-const snap=()=>({url:S.url,iconB64:S.iconB64,iSz:S.iSz,iClear:S.iClear,iInvert:S.iInvert,dots:S.dots,crn:S.crn,fg:S.fg,bg:S.bg,sz:S.sz,pad:S.pad,bRd:S.bRd,lbl:S.lbl,lblTxt:S.lblTxt,lblSz:S.lblSz,lblC:S.lblC,ec:S.ec});
+const updCnt=()=>$('libCnt').textContent=loadLib().length;
+const mkThumb=()=>{const s=$('qrC'),tc=document.createElement('canvas');tc.width=80;tc.height=80;tc.getContext('2d').drawImage(s,0,0,s.width,s.height,0,0,80,80);return tc.toDataURL('image/png');};
+const snap=()=>{const o={iconB64:S.iconB64};KEYS.forEach(k=>o[k]=S[k]);return o;};
 
 function saveQR(){
   const lib=loadLib();
   if(S.sid){
     const i=lib.findIndex(e=>e.id===S.sid);
-    if(i>=0){lib[i].settings=snap();lib[i].thumbnail=mkThumb();saveLib(lib);updCnt();setStatus('QR updated ✓',true);renderLib();return;}
+    if(i>=0){lib[i].settings=snap();lib[i].thumbnail=mkThumb();saveLib(lib);updCnt();setStatus('QR updated',true);renderLib();return;}
   }
-  // Show inline modal instead of prompt()
-  const mn=document.getElementById('modalName');
+  const mn=$('modalName');
   mn.value=S.lblTxt||'My QR';
-  document.getElementById('saveModal').classList.add('on');
+  $('saveModal').classList.add('on');
   setTimeout(()=>mn.focus(),80);
 }
-function closeModal(){document.getElementById('saveModal').classList.remove('on');}
+function closeModal(){$('saveModal').classList.remove('on');}
 function confirmSave(){
-  const name=document.getElementById('modalName').value.trim()||'Unnamed QR';
+  const name=$('modalName').value.trim()||'Unnamed QR';
   closeModal();
   const lib=loadLib();
   const entry={id:'qr_'+Date.now(),name,settings:snap(),thumbnail:mkThumb(),created:Date.now(),scanCount:0,scanLog:[]};
   lib.unshift(entry);saveLib(lib);S.sid=entry.id;syncPill();updCnt();
   setStatus(`Saved as "${entry.name}"`,true);renderLib();
 }
-// Allow Enter key in modal
-document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('saveModal').classList.contains('on'))confirmSave();if(e.key==='Escape')closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&$('saveModal').classList.contains('on'))confirmSave();if(e.key==='Escape')closeModal();});
 function loadQR(id){
   const e=loadLib().find(x=>x.id===id);if(!e)return;
-  const s=e.settings;Object.assign(S,s,{iconImg:null,invImg:null,iconB64:s.iconB64||null,sid:id});
+  const s=e.settings;
+  /* Defaults first, so designs saved before newer settings existed load cleanly. */
+  Object.assign(S,DEFAULTS,s,{iconImg:null,invImg:null,iconB64:s.iconB64||null,sid:id});
   if(s.iconB64){
     const img=new Image();
     img.onload=()=>{S.iconImg=img;S.invImg=null;render();};
     img.src=s.iconB64;
-    document.getElementById('pThumb').src=s.iconB64;
-    document.getElementById('pName').textContent='(saved icon)';
-    document.getElementById('upH').style.display='none';
-    document.getElementById('upP').classList.add('on');
+    $('pThumb').src=s.iconB64;
+    $('pName').textContent='(saved icon)';
+    $('upH').style.display='none';
+    $('upP').classList.add('on');
   } else {
-    S.iconImg=null;
-    document.getElementById('upP').classList.remove('on');
-    document.getElementById('upH').style.display='';
+    $('upP').classList.remove('on');
+    $('upH').style.display='';
   }
-  syncUI();syncPill();tab('D');render();
+  syncUI();syncPill();tab('D');loadFont();render();
 }
 function deleteQR(id){
   if(!confirm('Delete this saved QR?'))return;
@@ -529,97 +891,87 @@ function logScan(id){
   const lib=loadLib();const e=lib.find(x=>x.id===id);if(!e)return;
   e.scanCount=(e.scanCount||0)+1;(e.scanLog=e.scanLog||[]).push(Date.now());
   saveLib(lib);
-  const el=document.getElementById('sn_'+id);if(el)el.textContent=e.scanCount;
-  // Also update saved entry if it's the active one
+  const el=$('sn_'+id);if(el)el.textContent=e.scanCount;
   setStatus(`Scan logged — ${e.scanCount} total`,true);
 }
 function renderLib(){
-  const lib=loadLib();const c=document.getElementById('libList');
-  if(!lib.length){c.innerHTML='<div class="lib-empty">No saved QRs yet.<br>Design one then click<br><strong>⊕ Save QR</strong></div>';return;}
+  const lib=loadLib();const c=$('libList');
+  if(!lib.length){c.innerHTML='<div class="lib-empty">No saved QRs yet.<br>Design one, then choose<br><strong>Save QR</strong></div>';return;}
   c.innerHTML=lib.map(e=>{
     const d=new Date(e.created).toLocaleDateString('en-SG',{day:'numeric',month:'short',year:'numeric'});
     const lastScan=e.scanLog&&e.scanLog.length?new Date(e.scanLog[e.scanLog.length-1]).toLocaleDateString('en-SG',{day:'numeric',month:'short'}):'—';
+    const id=esc(e.id);
     return`<div class="lcard${S.sid===e.id?' active':''}">
       <div class="lcard-top">
-        <img class="lthumb" src="${e.thumbnail||''}" alt="">
+        <img class="lthumb" src="${esc(e.thumbnail||'')}" alt="">
         <div class="linfo">
-          <div class="lname">${e.name}</div>
-          <div class="lurl">${(e.settings||{}).url||''}</div>
+          <div class="lname">${esc(e.name)}</div>
+          <div class="lurl">${esc((e.settings||{}).url||'')}</div>
           <div class="ldate">Created ${d}</div>
         </div>
       </div>
       <div class="lbot">
         <div class="sctr">
-          <div class="spulse"></div>
-          <span class="snum" id="sn_${e.id}">${e.scanCount||0}</span>
+          <span class="snum" id="sn_${id}">${e.scanCount||0}</span>
           <span class="slbl">scans · last ${lastScan}</span>
         </div>
-        <button class="xbtn" onclick="logScan('${e.id}')" title="Log a scan">+</button>
-        <button class="xbtn" onclick="loadQR('${e.id}')">Load</button>
-        <button class="xbtn del" onclick="deleteQR('${e.id}')">Del</button>
+        <button class="xbtn" type="button" onclick="logScan('${id}')" title="Log a scan" aria-label="Log a scan">+1</button>
+        <button class="xbtn" type="button" onclick="loadQR('${id}')">Load</button>
+        <button class="xbtn del" type="button" onclick="deleteQR('${id}')">Delete</button>
       </div>
     </div>`;
   }).join('');
 }
 function syncPill(){
-  const pill=document.getElementById('sPill');const btn=document.getElementById('saveBtn');
-  if(S.sid){const e=loadLib().find(x=>x.id===S.sid);if(e){pill.classList.add('on');document.getElementById('pillName').textContent=e.name;btn.textContent='↻ Update QR';return;}}
-  pill.classList.remove('on');btn.textContent='⊕ Save QR';
+  const pill=$('sPill');const btn=$('saveBtn');
+  if(S.sid){const e=loadLib().find(x=>x.id===S.sid);if(e){pill.hidden=false;$('pillName').textContent=e.name;btn.textContent='Update QR';return;}}
+  pill.hidden=true;btn.textContent='Save QR';
 }
 function syncUI(){
-  document.getElementById('urlIn').value=S.url;
-  const sm={iSz:'iSz',qSz:'sz',qPd:'pad',bRd:'bRd',lblSz:'lblSz'};
-  Object.entries(sm).forEach(([id,k])=>{const el=document.getElementById(id);if(el){el.value=S[k];document.getElementById(id+'V').textContent=S[k]+slSfx[id];}});
-  [['dotSeg','dots'],['crnSeg','crn'],['clrSeg','iClear'],['ecSeg','ec']].forEach(([sid,k])=>{
-    document.getElementById(sid).querySelectorAll('.sbtn').forEach(b=>b.classList.toggle('on',b.dataset.v===S[k]));
-  });
-  [['fgC','fgH','fg'],['bgC','bgH','bg'],['lblC','lblCH','lblC']].forEach(([id,hid,k])=>{document.getElementById(id).value=S[k];document.getElementById(hid).textContent=S[k];});
-  document.getElementById('lblTog').classList.toggle('on',S.lbl);
-  document.getElementById('lblOpts').classList.toggle('on',S.lbl);
-  document.getElementById('lblTxt').value=S.lblTxt;
-  document.getElementById('invTog').classList.toggle('on',S.iInvert);
-  document.getElementById('ecDesc').textContent=ecD[S.ec];
+  $('urlIn').value=S.url;
+  SLIDERS.forEach(([id,k,sfx])=>{$(id).value=S[k];$(id+'V').textContent=S[k]+sfx;});
+  syncSegs();
+  COLORS.forEach(([id,hid,k])=>{$(id).value=S[k];$(hid).textContent=S[k];});
+  syncToggles();
+  $('lblTxt').value=S.lblTxt;
+  $('lblFont').value=S.lblFont;
+  $('ecDesc').textContent=ecD[S.ec];
 }
 
-/* Export */
+/* ---------- Export ---------- */
+const fileName=()=>(S.sid?(loadLib().find(e=>e.id===S.sid)||{}).name||'qr':'qr').replace(/[^a-z0-9]/gi,'_').toLowerCase()+'.png';
 function dlPNG(){
   const a=document.createElement('a');
-  const name=S.sid?(loadLib().find(e=>e.id===S.sid)||{}).name||'qr':'qr';
-  a.download=name.replace(/[^a-z0-9]/gi,'_').toLowerCase()+'.png';
-  a.href=document.getElementById('qrC').toDataURL('image/png');a.click();
+  a.download=fileName();
+  a.href=$('qrC').toDataURL('image/png');a.click();
   setStatus('Exported as PNG',true);
 }
 async function copyQR(){
-  const canvas=document.getElementById('qrC');
-  // Try modern clipboard API first (requires HTTPS or localhost)
+  const canvas=$('qrC');
   if(navigator.clipboard&&window.ClipboardItem){
     try{
-      await new Promise((res,rej)=>canvas.toBlob(b=>b?res(b):rej(),'image/png'));
       const blob=await new Promise(res=>canvas.toBlob(res,'image/png'));
       await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
       setStatus('Copied to clipboard',true);return;
     }catch(e){}
   }
-  // Fallback: copy data URL as text, or trigger download
   try{
-    const dataUrl=canvas.toDataURL('image/png');
-    await navigator.clipboard.writeText(dataUrl);
+    await navigator.clipboard.writeText(canvas.toDataURL('image/png'));
     setStatus('Data URL copied (paste into browser to view)',true);
   }catch(e){
-    // Final fallback: just download
     const a=document.createElement('a');
-    const name=S.sid?(loadLib().find(e=>e.id===S.sid)||{}).name||'qr':'qr';
-    a.download=name.replace(/[^a-z0-9]/gi,'_').toLowerCase()+'.png';
+    a.download=fileName();
     a.href=canvas.toDataURL('image/png');a.click();
     setStatus('Clipboard unavailable — downloaded instead',true);
   }
 }
+let stT=null;
 function setStatus(m,ok){
-  const el=document.getElementById('st');el.textContent=m;
+  const el=$('st');el.textContent=m;
   el.className='status '+(ok?'ok':'bad');
-  setTimeout(()=>{el.textContent='';el.className='status';},2500);
+  clearTimeout(stT);stT=setTimeout(()=>{el.textContent='';el.className='status';},2500);
 }
-updCnt();render();
+syncUI();syncPill();updCnt();loadFont();render();
 </script>
 </body>
 </html>
